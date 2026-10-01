@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="CodeType: practice typing real code in JavaScript, Python, Java and SQL, and track your speed and accuracy.">
+<title>CodeType — Get Faster at Typing Code</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ==================== HEADER / NAVIGATION ==================== -->
+  <header>
+    <nav>
+      <a class="logo" href="index.html">CodeType</a>
+
+      <div class="nav-links">
+        <a href="index.html" aria-current="page">Home</a>
+        <a href="practice.html">Practice</a>
+        <button id="theme-toggle" class="btn-secondary">Dark Mode</button>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- ==================== HERO ==================== -->
+    <section class="hero">
+
+      <div class="hero-text">
+        <p class="kicker">Typing practice for programmers</p>
+
+        <h1>Get faster at typing code.</h1>
+
+        <p class="lead">
+          Type real JavaScript, Python, Java and SQL snippets. See your speed
+          and accuracy as you go, and find out where you slow down.
+        </p>
+
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="practice.html">Start practicing</a>
+          <a class="btn btn-secondary" href="#how-it-works">How it works</a>
+        </div>
+
+        <ul class="langs" aria-label="Supported languages">
+          <li>JavaScript</li>
+          <li>Python</li>
+          <li>Java</li>
+          <li>SQL</li>
+        </ul>
+      </div>
+
+      <!-- A static preview of the practice page (decoration only). -->
+      <div class="hero-demo" aria-hidden="true">
+        <div class="stats">
+          <span class="stat">Time: <b>4.2s</b></span>
+          <span class="stat">WPM: <b>58</b></span>
+          <span class="stat">Accuracy: <b>100%</b></span>
+          <span class="stat">Errors: <b>0</b></span>
+        </div>
+
+        <pre class="code-display demo"><span class="correct">def is_even(number):
+    re</span><span class="typing-caret"></span><span class="pending" data-t="kw">turn</span><span class="pending"> number % </span><span class="pending" data-t="num">2</span><span class="pending"> == </span><span class="pending" data-t="num">0</span></pre>
+      </div>
+
+    </section>
+
+
+    <!-- ==================== FEATURES ==================== -->
+    <section class="home-section" id="features">
+      <h2 class="section-title">Built for people who write code</h2>
+      <p class="section-sub">
+        Symbols, brackets and indentation are what slow most people down,
+        so that is what you practise here.
+      </p>
+
+      <div class="cards">
+
+        <article class="card">
+          <h3>Real code, not random words</h3>
+          <p>
+            Snippets in JavaScript, Python, Java and SQL, with Easy and
+            Medium difficulty. Pick one language or mix them all.
+          </p>
+        </article>
+
+        <article class="card">
+          <h3>Live stats while you type</h3>
+          <p>
+            Time, WPM, accuracy and errors update on every keystroke.
+            A mistake you correct still counts, so your accuracy stays honest.
+          </p>
+        </article>
+
+        <article class="card">
+          <h3>A speed chart for every run</h3>
+          <p>
+            When you finish, see how your speed changed during the run, with
+            the moments you made mistakes marked on the line.
+          </p>
+        </article>
+
+        <article class="card">
+          <h3>Made for code</h3>
+          <p>
+            Syntax colours show what is coming next. Auto-indent skips the
+            leading spaces on new lines (you can turn it off), and Dark Mode
+            is one click away.
+          </p>
+        </article>
+
+      </div>
+    </section>
+
+
+    <!-- ==================== HOW IT WORKS ==================== -->
+    <section class="home-section" id="how-it-works">
+      <h2 class="section-title">How it works</h2>
+
+      <ol class="steps">
+        <li>
+          <h3>Choose a snippet</h3>
+          <p>Pick a language and a difficulty, or press Generate Snippet for a new one.</p>
+        </li>
+
+        <li>
+          <h3>Start typing</h3>
+          <p>Click the code box and type. The timer starts on your first keystroke.</p>
+        </li>
+
+        <li>
+          <h3>Review your run</h3>
+          <p>Check your WPM, accuracy and speed chart, then press Try Another.</p>
+        </li>
+      </ol>
+    </section>
+
+
+    <!-- ==================== FINAL CALL TO ACTION ==================== -->
+    <section class="home-section">
+      <div class="cta-panel">
+        <h2 class="section-title">Ready to type some code?</h2>
+        <p class="section-sub">It takes under a minute to finish your first snippet.</p>
+        <a class="btn btn-primary" href="practice.html">Start practicing</a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer>
+    <p>&copy; 2026 CodeType. All rights reserved.</p>
+  </footer>
+
+  <script src="theme.js"></script>
+</body>
+</html>
