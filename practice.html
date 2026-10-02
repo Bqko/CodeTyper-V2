@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice — CodeType</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- ==================== HEADER / NAVIGATION ==================== -->
+  <header>
+    <nav>
+      <a class="logo" href="index.html">CodeTyper V2</a>
+
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="practice.html" aria-current="page">Practice</a>
+        <button id="theme-toggle" class="btn-secondary">Dark Mode</button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ==================== MAIN APPLICATION ==================== -->
+  <main class="app">
+    <h1>Practice Typing Code</h1>
+    <p class="sub">
+    Type the snippet below as fast and accurately as you can.
+    Choose a language and difficulty, then generate a new snippet.
+    </p>
+
+    <!-- Language, difficulty, and snippet controls -->
+    <div class="controls">
+      <select id="lang" aria-label="Language">
+        <option value="all">All languages</option>
+        <option value="javascript">JavaScript</option>
+        <option value="python">Python</option>
+        <option value="java">Java</option>
+        <option value="sql">SQL</option>
+      </select>
+      <select id="difficulty">
+          <option value="easy">Easy</option>
+          <option value="medium">Medium</option>
+          <option value="hard">Hard</option>
+      </select>
+
+      <button id="new-snippet">Generate Snippet</button>
+
+      <!-- When on, pressing Enter also skips the next line's indentation -->
+      <label class="toggle" for="auto-indent">
+        <input type="checkbox" id="auto-indent">
+        Auto-indent
+      </label>
+
+      <div class="grow"></div>
+    </div>
+
+    <!-- Live typing statistics -->
+    <div class="stats">
+      <span class="stat">Time: <b id="stat-time">0.0s</b></span>
+      <span class="stat">WPM: <b id="stat-wpm">0</b></span>
+      <span class="stat">Accuracy: <b id="stat-acc">100%</b></span>
+      <span class="stat">Errors: <b id="stat-errors">0</b></span>
+    </div>
+
+    <!-- Code the user has to type -->
+    <div class="code-wrap">
+      <pre class="code-display" id="code-display" tabindex="0" aria-label="Code to type"></pre>
+      <div class="overlay" id="overlay">
+        <strong>Click here, then start typing</strong>
+        <span>The timer starts on your first keystroke</span>
+      </div>
+    </div>
+
+    <!-- Progress bar: how much of the snippet has been typed -->
+    <div class="progress" id="progress" role="progressbar"
+         aria-label="Typing progress" aria-valuemin="0" aria-valuemax="100"
+         aria-valuenow="0">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+
+    <!-- Results shown after the user finishes typing -->
+    <div class="result" id="result">
+
+      <!-- Rank: a game-style reveal based on your WPM -->
+      <div class="result-rank" id="result-rank">
+        <div class="rank-art">
+          <img class="rank-img" id="rank-img" alt="" width="128" height="128">
+
+          <!-- Confetti pieces are added here by JavaScript -->
+          <div class="rank-burst" id="rank-burst"></div>
+        </div>
+
+        <div class="rank-text">
+          <div class="rank-kicker">Your rank</div>
+          <div class="rank-title" id="rank-title"></div>
+          <p class="rank-line" id="rank-line"></p>
+        </div>
+      </div>
+
+      <div class="result-stats">
+        <div><div class="n" id="r-wpm">0</div><div class="l">WPM</div></div>
+        <div><div class="n" id="r-acc">0%</div><div class="l">ACCURACY</div></div>
+        <div><div class="n" id="r-time">0.0s</div><div class="l">TIME</div></div>
+        <div><div class="n" id="r-errors">0</div><div class="l">ERRORS</div></div>
+      </div>
+      <button id="try-again" class="btn-primary">Try Another</button>
+
+      <!-- Speed-over-time chart (drawn by JavaScript when you finish) -->
+      <div class="result-chart" id="result-chart" hidden>
+        <div class="chart-head">
+          <span>Speed over time (WPM)</span>
+          <span class="chart-legend"><i class="dot"></i>mistake</span>
+        </div>
+        <div id="chart-body"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer>
+    <p>&copy; 2026 CodeType. All rights reserved.</p>
+  </footer>
+
+  <!-- Emojis rise from the bottom of the whole screen (added by JavaScript) -->
+  <div class="emoji-layer" id="emoji-layer" aria-hidden="true"></div>
+
+  <script src="theme.js"></script>
+  <script>
+    /* ==========================================================
+       JAVASCRIPT APPLICATION
+       This section controls the interactive behavior of CodeType.
+       ========================================================== */
+    /* ==========================================================
+       1. THEME TOGGLE
+       Controls Dark Mode / Light Mode and remembers the choice.
+       ========================================================== */
+    /* The theme code now lives in theme.js, so the home page can share it. */
+
+
+    /* ==========================================================
+       2. SNIPPET LIBRARY
+       The code samples live in snippets.json (next to this file),
+       not in this script.
+
+       Format of snippets.json:
+         language -> difficulty -> list of snippets
+       and every snippet is a list of LINES, for example:
+
+         "python": {
+           "easy": [
+             [
+               "def is_even(number):",
+               "    return number % 2 == 0"
+             ]
+           ]
+         }
+
+       Spaces at the start of a line are kept exactly as written,
+       so indentation is whatever you type inside the quotes.
+       To add a snippet, copy one of the [ ... ] blocks.
+       ========================================================== */
+
+    // Filled by loadSnippetLibrary() once snippets.json has loaded.
+    // Same shape as the JSON, but each snippet is one string (lines joined).
+    const SNIPPETS = {};
+    let snippetsLoaded = false;
+
+    async function loadSnippetLibrary() {
+        const response = await fetch('snippets.json');
+
+        if (!response.ok) {
+            throw new Error('HTTP ' + response.status);
+        }
+
+        const data = await response.json();
+
+        for (const [language, levels] of Object.entries(data)) {
+            SNIPPETS[language] = {};
+
+            for (const [level, snippets] of Object.entries(levels)) {
+                SNIPPETS[language][level] = snippets.map(
+                    lines => lines.join('\n')
+                );
+            }
+        }
+    }
+
+    /* ==========================================================
+       2B. SYNTAX HIGHLIGHTING
+       Works out a "token type" (keyword, string, number, ...) for
+       every character of a snippet. The type is stored on each
+       character's <span> as data-t="...", and style.css turns it
+       into a colour for characters that are still pending.
+       ========================================================== */
+
+    const LANGUAGES = {
+
+        javascript: {
+            keywords: new Set([
+                'const', 'let', 'var', 'function', 'return', 'if', 'else',
+                'for', 'while', 'new', 'class', 'this', 'null', 'undefined',
+                'true', 'false', 'of', 'in', 'typeof', 'async', 'await',
+                'try', 'catch', 'finally', 'throw', 'extends', 'static',
+                'switch', 'case', 'break', 'continue', 'default', 'delete'
+            ]),
+            highlightClasses: true,
+            rules: [
+                ['com',  /\/\/.*|\/\*[\s\S]*?\*\//y],
+                ['str',  /"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'|`(?:\\.|[^`\\])*`/y],
+                // Regular expression such as /\s+/ (only right after "(").
+                ['str',  /(?<=\()\/(?:\\.|[^\/\\\n])+\/[a-z]*/y],
+                ['num',  /\d+(?:\.\d+)?/y],
+                ['word', /[A-Za-z_$][\w$]*/y]
+            ]
+        },
+
+        python: {
+            keywords: new Set([
+                'def', 'class', 'return', 'if', 'elif', 'else', 'for',
+                'while', 'in', 'not', 'and', 'or', 'is', 'import', 'from',
+                'as', 'pass', 'with', 'try', 'except', 'lambda', 'self',
+                'None', 'True', 'False', 'raise', 'finally', 'yield',
+                'break', 'continue', 'assert', 'global', 'del', 'async',
+                'await'
+            ]),
+            highlightClasses: true,
+            rules: [
+                ['com',  /#.*/y],
+                ['str',  /"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'/y],
+                ['num',  /\d+(?:\.\d+)?/y],
+                ['word', /[A-Za-z_]\w*/y]
+            ]
+        },
+
+        java: {
+            keywords: new Set([
+                'public', 'private', 'protected', 'static', 'final', 'void',
+                'class', 'int', 'double', 'boolean', 'new', 'return', 'if',
+                'else', 'for', 'while', 'import', 'this', 'null', 'true',
+                'false', 'try', 'catch', 'finally', 'throw', 'throws',
+                'extends', 'implements', 'interface', 'abstract', 'switch',
+                'case', 'break', 'continue', 'default', 'instanceof',
+                'super', 'long', 'float', 'char', 'byte', 'short', 'enum',
+                'package'
+            ]),
+            highlightClasses: true,
+            rules: [
+                ['com',  /\/\/.*|\/\*[\s\S]*?\*\//y],
+                ['str',  /"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'/y],
+                ['num',  /\d+(?:\.\d+)?/y],
+                ['word', /[A-Za-z_$][\w$]*/y]
+            ]
+        },
+
+        sql: {
+            // SQL is not case-sensitive, so keywords are compared in UPPERCASE.
+            ignoreCase: true,
+            keywords: new Set([
+                'SELECT', 'FROM', 'WHERE', 'INSERT', 'INTO', 'VALUES',
+                'UPDATE', 'SET', 'JOIN', 'INNER', 'LEFT', 'RIGHT', 'ON',
+                'GROUP', 'BY', 'ORDER', 'HAVING', 'AS', 'DESC', 'ASC',
+                'AND', 'OR', 'NOT', 'NULL', 'WITH', 'CASE', 'WHEN', 'THEN',
+                'ELSE', 'END', 'LIMIT', 'OFFSET', 'DISTINCT', 'LIKE', 'IN',
+                'IS', 'BETWEEN', 'EXISTS', 'UNION', 'CREATE', 'TABLE',
+                'DELETE', 'FULL', 'OUTER', 'CROSS'
+            ]),
+            highlightClasses: false,
+            rules: [
+                ['com',  /--.*/y],
+                ['str',  /'(?:''|[^'])*'/y],
+                ['num',  /\d+(?:\.\d+)?/y],
+                ['word', /[A-Za-z_]\w*/y]
+            ]
+        }
+    };
+
+
+    /* Decide what kind of word this is: keyword, function call,
+       class/type name, or plain text (null). */
+    function classifyWord(word, code, end, spec) {
+        const key = spec.ignoreCase ? word.toUpperCase() : word;
+
+        if (spec.keywords.has(key)) return 'kw';
+        if (code[end] === '(') return 'fn';
+        if (spec.highlightClasses && /^[A-Z]/.test(word)) return 'cls';
+
+        return null;
+    }
+
+
+    /* Returns an array with one token type (or null) per character. */
+    function tokenize(code, lang) {
+        const types = new Array(code.length).fill(null);
+        const spec = LANGUAGES[lang];
+
+        if (!spec) return types;
+
+        let i = 0;
+
+        while (i < code.length) {
+            let matched = false;
+
+            for (const [type, re] of spec.rules) {
+                re.lastIndex = i;
+                const m = re.exec(code);
+
+                if (m && m[0].length > 0) {
+                    const end = i + m[0].length;
+                    const t = type === 'word'
+                        ? classifyWord(m[0], code, end, spec)
+                        : type;
+
+                    if (t) types.fill(t, i, end);
+
+                    i = end;
+                    matched = true;
+                    break;
+                }
+            }
+
+            // Spaces, punctuation and operators stay uncoloured.
+            if (!matched) i++;
+        }
+
+        return types;
+    }
+
+
+    /* Pick a random snippet based on language and difficulty.
+       Returns { code, language } so we know how to colour it. */
+    function randomSnippet(lang, difficulty) {
+        let pool = [];
+
+        if (lang === 'all') {
+            pool = Object.entries(SNIPPETS).flatMap(([name, level]) =>
+                (level[difficulty] || []).map(code => ({ code, language: name }))
+            );
+        } else {
+            const list = (SNIPPETS[lang] && SNIPPETS[lang][difficulty]) || [];
+
+            pool = list.map(code => ({ code, language: lang }));
+        }
+
+        // null means "nothing found for this choice".
+        if (pool.length === 0) return null;
+
+        return pool[Math.floor(Math.random() * pool.length)];
+    }
+
+
+    /* ==========================================================
+       3. TYPING ENGINE
+       Stores the current snippet and keeps track of typing progress.
+       ========================================================== */
+    const $ = (id) => document.getElementById(id);
+
+    const display = $('code-display');
+    const overlay = $('overlay');
+    const langSelect = $('lang');
+    const difficultySelect = $('difficulty');
+
+    let target = '';
+    let spans = [];
+    let position = 0;
+
+    /*
+    * correctCount     = characters that are correct RIGHT NOW.
+    *                    Goes down on Backspace. Used for WPM.
+    *
+    * totalKeystrokes  = every character the user has typed.
+    * correctKeystrokes = how many of those were correct.
+    * errorCount       = how many were wrong.
+    *                    These three NEVER go down, even after Backspace,
+    *                    so a corrected mistake still counts against
+    *                    Accuracy and Errors.
+    */
+    let correctCount = 0;
+    let totalKeystrokes = 0;
+    let correctKeystrokes = 0;
+    let errorCount = 0;
+
+    let startTime = null;
+    let timerId = null;
+    let finished = false;
+
+    /*
+    * Speed samples for the result chart.
+    * One entry per second: { t: seconds, wpm: speed, errors: total mistakes }
+    */
+    let samples = [];
+    let lastSampleSecond = 0;
+
+
+    /*
+    * Stores the result of every typed character.
+    *
+    * true  = the typed character was correct
+    * false = the typed character was incorrect
+    * 'auto' = indentation skipped automatically (Auto-indent);
+    *          not counted in WPM or accuracy
+    *
+    * This is important for Backspace.
+    * When a character is deleted, we can undo exactly
+    * what that character contributed to the statistics.
+    */
+    let typedResults = [];
+
+
+    /*
+    * Auto-indent setting (checkbox in the controls).
+    * Saved in localStorage; on by default.
+    */
+    const autoIndentBox = $('auto-indent');
+    autoIndentBox.checked = localStorage.getItem('autoIndent') !== 'off';
+
+
+    /* ==========================================================
+       4. CARET
+       Creates and moves the visual typing cursor.
+       ========================================================== */
+
+    const caret = document.createElement('span');
+    caret.className = 'typing-caret';
+
+
+    function updateCaret() {
+        if (caret.parentNode) {
+            caret.remove();
+        }
+
+        if (position < spans.length) {
+            spans[position].before(caret);
+        } else if (spans.length > 0) {
+            spans[spans.length - 1].after(caret);
+        }
+
+        // The caret moves every time the position changes
+        // (typing, Backspace, new snippet), so update the bar here too.
+        updateProgress();
+    }
+
+
+    /* Progress bar: percentage of the snippet the caret has passed. */
+    const progressBar = $('progress');
+    const progressFill = $('progress-fill');
+
+    function updateProgress() {
+        const percent = spans.length
+            ? Math.round((position / spans.length) * 100)
+            : 0;
+
+        progressFill.style.width = percent + '%';
+        progressBar.setAttribute('aria-valuenow', percent);
+    }
+
+
+    /* ==========================================================
+       5. LOAD SNIPPET
+       Resets the game and displays a new random code snippet.
+       ========================================================== */
+
+    function loadSnippet() {
+      // Ignore clicks until snippets.json has finished loading.
+      if (!snippetsLoaded) return;
+
+      const pick = randomSnippet(
+          langSelect.value,
+          difficultySelect.value
+      );
+
+      // Nothing in snippets.json for this language + difficulty.
+      if (!pick) {
+        finished = true;
+        display.textContent =
+          'No snippets found for this language and difficulty. ' +
+          'Check snippets.json.';
+        overlay.classList.remove('show');
+        $('result').classList.remove('show');
+        return;
+      }
+
+      finished = false;
+
+      target = pick.code;
+
+      // One token type per character (keyword, string, number, ...).
+      const tokenTypes = tokenize(target, pick.language);
+
+      position = 0;
+
+      correctCount = 0;
+      totalKeystrokes = 0;
+      correctKeystrokes = 0;
+      errorCount = 0;
+
+      typedResults = [];
+
+      samples = [];
+      lastSampleSecond = 0;
+
+      startTime = null;
+      finished = false;
+
+      if (timerId) {
+        clearInterval(timerId);
+        timerId = null;
+      }
+
+      display.classList.remove('finish-pulse');
+      $('rank-burst').innerHTML = '';
+      $('emoji-layer').innerHTML = '';
+
+      display.innerHTML = '';
+      spans = [...target].map((ch, index) => {
+        const s = document.createElement('span');
+
+        s.textContent = ch;
+        s.className = 'pending';
+
+        // data-t survives later className changes (pending/correct/incorrect).
+        if (tokenTypes[index]) {
+          s.dataset.t = tokenTypes[index];
+        }
+
+        display.appendChild(s);
+
+        return s;
+      });
+
+      updateCaret();
+
+      overlay.classList.remove('show');
+      $('result').classList.remove('show');
+
+      updateStats();
+    }
+
+
+    /* ==========================================================
+       6. TIMER
+       Measures how long the user has been typing.
+       ========================================================== */
+
+    function tick() {
+      const secs = elapsedSeconds();
+
+      // Take one speed sample every full second.
+      if (Math.floor(secs) > lastSampleSecond) {
+        lastSampleSecond = Math.floor(secs);
+        recordSample(secs);
+      }
+
+      updateStats();
+    }
+
+
+    function elapsedSeconds() {
+      return startTime
+        ? (performance.now() - startTime) / 1000
+        : 0;
+    }
+
+
+    /* ==========================================================
+       7. STATISTICS
+       Calculates WPM, accuracy, time, and errors.
+       ========================================================== */
+
+    function updateStats() {
+      const secs = elapsedSeconds();
+
+      const minutes = secs / 60 || 1 / 60;
+
+      const wpm = Math.round(
+        (correctCount / 5) / minutes
+      );
+
+      // Accuracy = correct keystrokes / all keystrokes typed.
+      const acc = totalKeystrokes
+        ? Math.round((correctKeystrokes / totalKeystrokes) * 100)
+        : 100;
+
+      $('stat-time').textContent = secs.toFixed(1) + 's';
+      $('stat-wpm').textContent = startTime ? wpm : 0;
+      $('stat-acc').textContent = acc + '%';
+      $('stat-errors').textContent = errorCount;
+    }
+
+
+    /* ==========================================================
+       8. FINISH
+       Runs when the user reaches the end of the snippet.
+       Displays the final results.
+       ========================================================== */
+
+    function finish() {
+      finished = true;
+
+      clearInterval(timerId);
+      timerId = null;
+
+      // Final sample at the exact finish time.
+      const endSecs = elapsedSeconds();
+
+      if (!samples.length || endSecs - samples[samples.length - 1].t > 0.05) {
+        recordSample(endSecs);
+      }
+
+      updateStats();
+
+      // The result numbers count up from 0 (one after another).
+      countUp($('r-wpm'),    $('stat-wpm').textContent,  0);
+      countUp($('r-acc'),    $('stat-acc').textContent,  100);
+      countUp($('r-time'),   $('stat-time').textContent, 200);
+      countUp($('r-errors'), String(errorCount),         300);
+
+      // Pick the rank from the WPM that is shown, and prepare its reveal.
+      showRank(parseInt($('stat-wpm').textContent, 10) || 0);
+
+      $('result').classList.add('show');
+
+      // Green pulse around the code box.
+      display.classList.add('finish-pulse');
+
+      // Draw after the panel is visible so the width can be measured.
+      drawChart();
+
+      // Remove caret when finished.
+      if (caret.parentNode) {
+        caret.remove();
+      }
+    }
+
+
+    /* ==========================================================
+       8A. FINISH ANIMATIONS
+       Helpers for the animations that play when a run ends.
+       Most of the animation is CSS (see style.css, section 15B);
+       the number count-up needs JavaScript.
+       ========================================================== */
+
+    /* True if the user asked their system for less motion. */
+    function prefersReducedMotion() {
+      return !!(window.matchMedia &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    }
+
+
+    let countUpId = 0;
+
+    /*
+    * Animate a number from 0 up to the value in finalText.
+    * finalText keeps its format, e.g. "68", "94%" or "12.6s".
+    * delay = milliseconds to wait before starting.
+    */
+    function countUp(el, finalText, delay) {
+      const target = parseFloat(finalText);
+
+      // Reduced motion (or not a number): just show the final value.
+      if (isNaN(target) || prefersReducedMotion()) {
+        el.textContent = finalText;
+        return;
+      }
+
+      // Keep the same number of decimals and the same suffix (%, s).
+      const decimalPart = finalText.match(/\.(\d+)/);
+      const decimals = decimalPart ? decimalPart[1].length : 0;
+      const suffix = finalText.replace(/^[\d.]+/, '');
+
+      // If a newer animation starts on this element, the old one stops.
+      const id = ++countUpId;
+      el.dataset.countUp = id;
+
+      el.textContent = (0).toFixed(decimals) + suffix;
+
+      const duration = 800;
+      const begin = performance.now() + delay;
+
+      function frame(now) {
+        if (el.dataset.countUp !== String(id)) return;
+
+        const t = Math.min(Math.max((now - begin) / duration, 0), 1);
+        const eased = 1 - Math.pow(1 - t, 3);   // starts fast, ends slow
+
+        if (t < 1) {
+          el.textContent = (target * eased).toFixed(decimals) + suffix;
+          requestAnimationFrame(frame);
+        } else {
+          el.textContent = finalText;
+        }
+      }
+
+      requestAnimationFrame(frame);
+    }
+
+
+    /* ==========================================================
+       8A2. RANKS
+       Your WPM decides your rank. Each rank has a title, a line of
+       text, an image, and how much confetti it gets.
+
+       "min" is the lowest WPM for that rank (inclusive), so:
+         0-9 grandma, 10-19 slow, 20-39 average,
+         40-59 good, 60-79 very good, 80+ godlike.
+
+       To use your own pictures, change the "image" paths
+       (any PNG, JPG or SVG works).
+
+       Optional per rank:
+         emojis     = list of emojis that rise from the bottom of the
+                      whole screen (see spawnEmojis below)
+         emojiCount = how many pop up (default 24)
+       ========================================================== */
+
+    const RANK_REVEAL = 0.9;   // seconds after finishing until the rank appears
+
+    const RANKS = [
+      {
+        id: 'grandma', min: 0,
+        title: 'Slower than grandma',
+        line: 'Grandma is still hunting for the Shift key. Give it another go!',
+        image: 'images/rank-grandma.svg',
+        confetti: 0,
+        emojis: ['😂', '🤣', '😆', '😹'],
+        emojiCount: 28
+      },
+      {
+        id: 'slow', min: 10,
+        title: 'Slower than average',
+        line: 'Warming up. Every run makes your fingers a little faster.',
+        image: 'images/rank-slow.svg',
+        confetti: 0
+      },
+      {
+        id: 'average', min: 20,
+        title: 'Average',
+        line: 'Right in the middle of the pack. Keep going and you will climb.',
+        image: 'images/rank-average.svg',
+        confetti: 0
+      },
+      {
+        id: 'good', min: 40,
+        title: 'Good',
+        line: 'Solid speed. Your fingers know where the symbols are.',
+        image: 'images/rank-good.svg',
+        confetti: 14,
+        colors: ['#6FBF8B', '#F7C948', '#4C9BE8']
+      },
+      {
+        id: 'great', min: 60,
+        title: 'Very good',
+        line: 'Fast and clean. You are flying through this code!',
+        image: 'images/rank-great.svg',
+        confetti: 36,
+        colors: ['#4C9BE8', '#6FBF8B', '#F7C948', '#E5533D', '#C39BE0']
+      },
+      {
+        id: 'godlike', min: 80,
+        title: 'Godlike',
+        line: 'Are you even human? Absolutely unreal speed.',
+        image: 'images/rank-godlike.svg',
+        confetti: 70,
+        colors: ['#FFD54A', '#F7C948', '#FFF3C4', '#E0A82E', '#FFFFFF']
+      }
+    ];
+
+    // Load the pictures now so they appear instantly at the end of a run.
+    RANKS.forEach((rank) => {
+      const preload = new Image();
+      preload.src = rank.image;
+    });
+
+
+    /* Fill in the rank block for this WPM and start its animations. */
+    function showRank(wpm) {
+      // Highest rank whose minimum WPM has been reached.
+      const rank = [...RANKS].reverse().find(r => wpm >= r.min);
+
+      // The tier name lets CSS give each rank its own animation.
+      $('result').dataset.tier = rank.id;
+      $('result-rank').style.setProperty('--reveal', RANK_REVEAL + 's');
+
+      const img = $('rank-img');
+      img.src = rank.image;
+      img.alt = rank.title;
+
+      $('rank-title').textContent = rank.title;
+      $('rank-line').textContent = rank.line;
+
+      spawnConfetti(rank);
+      spawnEmojis(rank);
+    }
+
+
+    /* Confetti: small coloured pieces that burst out of the picture.
+       The movement itself is a CSS animation (style.css, "confetti"). */
+    function spawnConfetti(rank) {
+      const burst = $('rank-burst');
+
+      burst.innerHTML = '';
+
+      if (!rank.confetti || prefersReducedMotion()) return;
+
+      for (let i = 0; i < rank.confetti; i++) {
+        const piece = document.createElement('i');
+
+        // Random direction and distance for each piece.
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 70 + Math.random() * 130;
+        const dx = Math.cos(angle) * distance;
+        const peakY = Math.sin(angle) * distance * 0.7 - 40;   // highest point
+
+        piece.style.setProperty('--px', (dx * 0.55) + 'px');
+        piece.style.setProperty('--py', peakY + 'px');
+        piece.style.setProperty('--dx', dx + 'px');
+        piece.style.setProperty('--dy', (peakY + 110 + Math.random() * 90) + 'px');
+        piece.style.setProperty('--rot', (Math.random() * 720 - 360) + 'deg');
+
+        piece.style.background = rank.colors[i % rank.colors.length];
+        piece.style.width = (6 + Math.random() * 5) + 'px';
+        piece.style.height = (8 + Math.random() * 6) + 'px';
+        piece.style.animationDelay =
+          (RANK_REVEAL + 0.05 + Math.random() * 0.15) + 's';
+
+        burst.appendChild(piece);
+      }
+    }
+
+
+    /* Emojis that pop up from the bottom of the whole screen.
+       The movement is a CSS animation (style.css, "emoji-rise");
+       JavaScript gives each emoji its own position, size and timing. */
+    function spawnEmojis(rank) {
+      const layer = $('emoji-layer');
+
+      layer.innerHTML = '';
+
+      if (!rank.emojis || prefersReducedMotion()) return;
+
+      const count = rank.emojiCount || 24;
+
+      for (let i = 0; i < count; i++) {
+        const piece = document.createElement('span');
+
+        piece.textContent =
+          rank.emojis[Math.floor(Math.random() * rank.emojis.length)];
+
+        // Spread evenly across the full width, with some randomness.
+        piece.style.left = (((i + Math.random()) / count) * 100) + 'vw';
+
+        piece.style.fontSize = (28 + Math.random() * 36) + 'px';
+
+        // How high it rises, how far it drifts sideways, how much it tilts.
+        piece.style.setProperty('--rise', (45 + Math.random() * 45) + 'vh');
+        piece.style.setProperty('--drift', (Math.random() * 80 - 40) + 'px');
+        piece.style.setProperty('--tilt', (Math.random() * 50 - 25) + 'deg');
+
+        piece.style.animationDuration = (2.2 + Math.random() * 1.8) + 's';
+        piece.style.animationDelay =
+          (RANK_REVEAL + Math.random() * 1.4) + 's';
+
+        // Remove each emoji when its animation has finished.
+        piece.addEventListener('animationend', () => piece.remove());
+
+        layer.appendChild(piece);
+      }
+    }
+
+
+    /* ==========================================================
+       8B. RESULT CHART
+       Draws a line chart of WPM over time as an inline SVG.
+       Colours come from CSS variables, so it follows Dark Mode.
+       Red dots mark the seconds in which you made a mistake.
+       ========================================================== */
+
+    function recordSample(secs) {
+      const wpm = secs > 0
+        ? Math.round((correctCount / 5) / (secs / 60))
+        : 0;
+
+      samples.push({ t: secs, wpm: wpm, errors: errorCount });
+    }
+
+
+    /* Small helper: create an SVG element with attributes. */
+    function svgEl(name, attrs, text) {
+      const node = document.createElementNS('http://www.w3.org/2000/svg', name);
+
+      for (const key in attrs) {
+        node.setAttribute(key, attrs[key]);
+      }
+
+      if (text !== undefined) {
+        node.textContent = text;
+      }
+
+      return node;
+    }
+
+
+    function drawChart() {
+      const box = $('result-chart');
+      const body = $('chart-body');
+
+      body.innerHTML = '';
+
+      // A run shorter than ~1 second has nothing worth plotting.
+      if (samples.length < 2) {
+        box.hidden = true;
+        return;
+      }
+
+      box.hidden = false;
+
+      const W = Math.max(body.clientWidth, 300);
+      const H = 200;
+      const pad = { top: 24, right: 16, bottom: 28, left: 40 };
+      const plotW = W - pad.left - pad.right;
+      const plotH = H - pad.top - pad.bottom;
+
+      const totalTime = samples[samples.length - 1].t;
+      const maxWpm = Math.max(...samples.map(p => p.wpm));
+
+      // Choose a tidy Y axis: about 4 gridlines.
+      const step = [5, 10, 20, 25, 50, 100, 200].find(v => v >= maxWpm / 4) || 200;
+      const topWpm = Math.ceil(maxWpm / step) * step || step;
+
+      const x = (t) => pad.left + (t / totalTime) * plotW;
+      const y = (wpm) => pad.top + plotH * (1 - wpm / topWpm);
+
+      const svg = svgEl('svg', {
+        viewBox: '0 0 ' + W + ' ' + H,
+        role: 'img',
+        'aria-label': 'Line chart of typing speed over time'
+      });
+
+      // Horizontal gridlines + WPM labels.
+      for (let v = 0; v <= topWpm; v += step) {
+        svg.appendChild(svgEl('line', {
+          class: 'chart-grid',
+          x1: pad.left, x2: W - pad.right, y1: y(v), y2: y(v)
+        }));
+
+        svg.appendChild(svgEl('text', {
+          class: 'chart-label',
+          x: pad.left - 8, y: y(v) + 4, 'text-anchor': 'end'
+        }, v));
+      }
+
+      // Time labels along the bottom (at most ~8).
+      const xStep = Math.max(1, Math.ceil(totalTime / 8));
+
+      for (let t = 0; t <= totalTime; t += xStep) {
+        svg.appendChild(svgEl('text', {
+          class: 'chart-label',
+          x: x(t), y: H - 8, 'text-anchor': 'middle'
+        }, t + 's'));
+      }
+
+      /*
+      * The speed line.
+      *
+      * The first real measurement is at 1 second, because speed cannot
+      * be measured at 0s (nothing has been typed yet). So the line
+      * starts at 0s with the same value as the first measurement,
+      * which makes it begin at the left edge of the chart.
+      */
+      const linePoints = [{ t: 0, wpm: samples[0].wpm }, ...samples];
+
+      const line = svgEl('polyline', {
+        class: 'chart-line',
+        points: linePoints.map(p => x(p.t) + ',' + y(p.wpm)).join(' ')
+      });
+
+      // Total length of the line, so CSS can "draw" it from left to right.
+      let lineLength = 0;
+
+      for (let i = 1; i < linePoints.length; i++) {
+        lineLength += Math.hypot(
+          x(linePoints[i].t) - x(linePoints[i - 1].t),
+          y(linePoints[i].wpm) - y(linePoints[i - 1].wpm)
+        );
+      }
+
+      line.style.setProperty('--len', Math.ceil(lineLength) + 2);
+      svg.appendChild(line);
+
+      // Red dots where mistakes happened.
+      let previousErrors = 0;
+      const mistakesAt = [];
+
+      samples.forEach((p, index) => {
+        if (p.errors > previousErrors) {
+          const mistakes = p.errors - previousErrors;
+          mistakesAt[index] = mistakes;
+          const dot = svgEl('circle', {
+            class: 'chart-dot',
+            cx: x(p.t), cy: y(p.wpm), r: 4
+          });
+
+          // Pop in when the drawing line reaches this point
+          // (the line takes 1s, starting after 0.3s).
+          dot.style.animationDelay = (0.3 + p.t / totalTime) + 's';
+
+          dot.appendChild(svgEl(
+            'title', {},
+            p.wpm + ' WPM at ' + p.t.toFixed(1) + 's, ' +
+            mistakes + (mistakes === 1 ? ' mistake' : ' mistakes')
+          ));
+
+          svg.appendChild(dot);
+        }
+
+        previousErrors = p.errors;
+      });
+
+      /*
+      * HOVER GUIDE
+      *
+      * When the mouse is over the chart, show a vertical line at the
+      * nearest sample, a dot on the speed line, and a small label.
+      */
+      const hover = svgEl('g', { class: 'chart-hover' });
+      const guide = svgEl('line', {
+        class: 'chart-guide',
+        y1: pad.top,
+        y2: pad.top + plotH
+      });
+      const hoverDot = svgEl('circle', { class: 'chart-hover-dot', r: 5 });
+      const tip = svgEl('text', { class: 'chart-tip', y: 14 });
+
+      hover.append(guide, hoverDot, tip);
+      svg.appendChild(hover);
+
+      svg.addEventListener('pointermove', (e) => {
+        // Convert the mouse position into chart (viewBox) coordinates.
+        const rect = svg.getBoundingClientRect();
+        const mx = (e.clientX - rect.left) * (rect.width ? W / rect.width : 1);
+
+        // Outside the plotting area: hide the guide.
+        if (mx < pad.left - 10 || mx > W - pad.right + 10) {
+          hover.classList.remove('on');
+          return;
+        }
+
+        // Find the sample closest to the mouse.
+        let best = 0;
+
+        samples.forEach((p, i) => {
+          if (Math.abs(x(p.t) - mx) < Math.abs(x(samples[best].t) - mx)) {
+            best = i;
+          }
+        });
+
+        const p = samples[best];
+        const px = x(p.t);
+
+        guide.setAttribute('x1', px);
+        guide.setAttribute('x2', px);
+
+        hoverDot.setAttribute('cx', px);
+        hoverDot.setAttribute('cy', y(p.wpm));
+
+        let label = p.wpm + ' WPM · ' + p.t.toFixed(1) + 's';
+
+        if (mistakesAt[best]) {
+          label += ' · ' + mistakesAt[best] +
+            (mistakesAt[best] === 1 ? ' mistake' : ' mistakes');
+        }
+
+        tip.textContent = label;
+
+        // Keep the label inside the chart: flip it near the right edge.
+        const nearRight = px > W / 2;
+
+        tip.setAttribute('x', nearRight ? px - 8 : px + 8);
+        tip.setAttribute('text-anchor', nearRight ? 'end' : 'start');
+
+        hover.classList.add('on');
+      });
+
+      svg.addEventListener('pointerleave', () => {
+        hover.classList.remove('on');
+      });
+
+      body.appendChild(svg);
+    }
+
+
+    /* ==========================================================
+       9. HANDLE ONE CHARACTER
+       Checks whether each typed character is correct or incorrect.
+       ========================================================== */
+
+    function typeCharacter(char) {
+      if (position >= spans.length) {
+        return;
+      }
+
+      if (!startTime) {
+        startTime = performance.now();
+        timerId = setInterval(tick, 100);
+      }
+
+      const span = spans[position];
+
+      const isCorrect = char === target[position];
+
+      // Save the result so Backspace knows what to undo.
+      typedResults.push(isCorrect);
+
+      // Every keystroke is remembered permanently (for Accuracy).
+      totalKeystrokes++;
+
+      if (isCorrect) {
+        span.className = 'correct';
+        correctCount++;
+        correctKeystrokes++;
+      } else {
+        span.className = 'incorrect';
+        errorCount++;
+      }
+
+      position++;
+
+      /*
+      * AUTO-INDENT
+      *
+      * After a correct Enter, skip the spaces/tabs that start the
+      * next line. They are marked correct but are NOT added to
+      * correctCount, so they don't inflate WPM or accuracy.
+      */
+      if (isCorrect && char === '\n' && autoIndentBox.checked) {
+        while (
+          position < spans.length &&
+          (target[position] === ' ' || target[position] === '\t')
+        ) {
+          spans[position].className = 'correct';
+          typedResults.push('auto');
+          position++;
+        }
+      }
+
+      if (position < spans.length) {
+        spans[position].className = 'pending';
+      }
+
+      updateCaret();
+
+      if (position >= spans.length) {
+        finish();
+      }
+
+      updateStats();
+    }
+
+
+    /* ==========================================================
+       10. KEYBOARD INPUT
+       Handles normal typing, Tab, Backspace, and special keys.
+       ========================================================== */
+
+    display.addEventListener('keydown', (e) => {
+      if (finished) return;
+
+      /*
+      * TAB
+      *
+      * One Tab = four spaces.
+      */
+      if (e.key === 'Tab') {
+        e.preventDefault();
+
+        for (let i = 0; i < 4; i++) {
+          if (position < spans.length) {
+            typeCharacter(' ');
+          } else {
+            break;
+          }
+
+          // Stop if the snippet was completed.
+          if (finished) break;
+        }
+
+        return;
+      }
+
+
+      /*
+      * BACKSPACE
+      */
+      if (e.key === 'Backspace') {
+        e.preventDefault();
+
+        if (position > 0) {
+          /*
+          * If the cursor is after auto-indented spaces, remove them
+          * first. The Enter that caused them is then removed by the
+          * normal Backspace logic below, so one Backspace undoes
+          * the whole "Enter + indentation".
+          */
+          while (
+            position > 0 &&
+            typedResults[typedResults.length - 1] === 'auto'
+          ) {
+            typedResults.pop();
+            position--;
+            spans[position].className = 'pending';
+          }
+
+          /*
+          * Remove the result of the character we're deleting.
+          */
+          const wasCorrect = typedResults.pop();
+
+          /*
+          * Only the "correct right now" count goes down (for WPM).
+          * Keystrokes and errors stay, so the mistake is remembered.
+          */
+          if (wasCorrect) {
+            correctCount--;
+          }
+
+          position--;
+
+          /*
+          * Reset the character back to pending.
+          */
+          spans[position].className = 'pending';
+
+          updateCaret();
+          updateStats();
+        }
+
+        return;
+      }
+
+
+      /*
+      * Ignore modifier/navigation keys.
+      */
+      const char = e.key === 'Enter'
+        ? '\n'
+        : e.key;
+
+      if (char.length !== 1) {
+        return;
+      }
+
+      e.preventDefault();
+
+      typeCharacter(char);
+    });
+
+
+    /* ==========================================================
+       11. FOCUS / OVERLAY
+       Shows or hides the "Click here" overlay depending on focus.
+       ========================================================== */
+
+    display.addEventListener('focus', () => {
+      overlay.classList.remove('show');
+      updateCaret();
+    });
+
+
+    display.addEventListener('blur', () => {
+      if (!finished) {
+        overlay.classList.add('show');
+      }
+    });
+
+
+    display.addEventListener('click', () => {
+      display.focus();
+    });
+
+
+    overlay.addEventListener('click', () => {
+      display.focus();
+    });
+
+
+    /* ==========================================================
+       12. CONTROLS
+       Connects buttons and dropdowns to the appropriate functions.
+       ========================================================== */
+
+    $('new-snippet').addEventListener('click', loadSnippet);
+
+    $('try-again').addEventListener('click', loadSnippet);
+
+    langSelect.addEventListener('change', loadSnippet);
+
+    difficultySelect.addEventListener('change', loadSnippet);
+
+    autoIndentBox.addEventListener('change', () => {
+      localStorage.setItem(
+        'autoIndent',
+        autoIndentBox.checked ? 'on' : 'off'
+      );
+
+      loadSnippet();
+    });
+
+
+    /* ==========================================================
+       13. INITIAL LOAD
+       Loads snippets.json, then shows the first snippet.
+       ========================================================== */
+
+    loadSnippetLibrary()
+      .then(() => {
+        snippetsLoaded = true;
+        loadSnippet();
+        overlay.classList.add('show');
+      })
+      .catch((error) => {
+        console.error('Could not load snippets.json:', error);
+
+        finished = true;
+        display.textContent =
+          'Could not load snippets.json. If you opened this file by ' +
+          'double-clicking it, run the site from a local server instead ' +
+          '(for example the "Live Server" extension in VS Code).';
+      });
+  </script>
+
+</body>
+</html>

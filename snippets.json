@@ -1,0 +1,564 @@
+{
+  "javascript": {
+    "easy": [
+      [
+        "const name = \"Alex\";",
+        "console.log(\"Hello, \" + name);"
+      ],
+      [
+        "const numbers = [1, 2, 3, 4, 5];",
+        "",
+        "const sum = numbers.reduce(",
+        "    (total, number) => total + number,",
+        "    0",
+        ");",
+        "",
+        "console.log(sum);"
+      ],
+      [
+        "function isEven(number) {",
+        "    return number % 2 === 0;",
+        "}",
+        "",
+        "console.log(isEven(10));"
+      ],
+      [
+        "function greet(name) {",
+        "    return `Hello, ${name}!`;",
+        "}",
+        "",
+        "console.log(greet(\"World\"));"
+      ]
+    ],
+    "medium": [
+      [
+        "function debounce(fn, delay) {",
+        "    let timer;",
+        "",
+        "    return (...args) => {",
+        "        clearTimeout(timer);",
+        "",
+        "        timer = setTimeout(() => {",
+        "            fn(...args);",
+        "        }, delay);",
+        "    };",
+        "}"
+      ],
+      [
+        "function countWords(text) {",
+        "    const words = text.trim().split(/\\s+/);",
+        "",
+        "    return words.length;",
+        "}",
+        "",
+        "console.log(countWords(\"Hello world from JavaScript\"));"
+      ],
+      [
+        "const users = [",
+        "    { name: \"Alex\", age: 20 },",
+        "    { name: \"Sam\", age: 25 },",
+        "    { name: \"John\", age: 17 }",
+        "];",
+        "",
+        "const adults = users.filter(user => user.age >= 18);",
+        "",
+        "console.log(adults);"
+      ],
+      [
+        "function findMax(numbers) {",
+        "    if (numbers.length === 0) {",
+        "        return null;",
+        "    }",
+        "",
+        "    return Math.max(...numbers);",
+        "}",
+        "",
+        "console.log(findMax([4, 8, 2, 15, 6]));"
+      ]
+    ],
+    "hard": [
+      [
+        "async function fetchUser(id) {",
+        "    try {",
+        "        const response = await fetch(`/api/users/${id}`);",
+        "",
+        "        if (!response.ok) {",
+        "            throw new Error(`Request failed: ${response.status}`);",
+        "        }",
+        "",
+        "        const { name, email } = await response.json();",
+        "        return { name, email, active: true };",
+        "    } catch (error) {",
+        "        console.error(error.message);",
+        "        return null;",
+        "    }",
+        "}"
+      ],
+      [
+        "class Cache {",
+        "    constructor(limit = 3) {",
+        "        this.limit = limit;",
+        "        this.items = new Map();",
+        "    }",
+        "",
+        "    get(key) {",
+        "        if (!this.items.has(key)) return undefined;",
+        "",
+        "        const value = this.items.get(key);",
+        "        this.items.delete(key);",
+        "        this.items.set(key, value);",
+        "        return value;",
+        "    }",
+        "",
+        "    set(key, value) {",
+        "        if (this.items.size >= this.limit) {",
+        "            const oldest = this.items.keys().next().value;",
+        "            this.items.delete(oldest);",
+        "        }",
+        "",
+        "        this.items.set(key, value);",
+        "    }",
+        "}"
+      ],
+      [
+        "function groupBy(items, getKey) {",
+        "    return items.reduce((groups, item) => {",
+        "        const key = getKey(item);",
+        "",
+        "        if (!groups[key]) {",
+        "            groups[key] = [];",
+        "        }",
+        "",
+        "        groups[key].push(item);",
+        "        return groups;",
+        "    }, {});",
+        "}",
+        "",
+        "const words = [\"apple\", \"bat\", \"cat\", \"avocado\"];",
+        "console.log(groupBy(words, (word) => word[0]));"
+      ],
+      [
+        "const memoize = (fn) => {",
+        "    const cache = {};",
+        "",
+        "    return (...args) => {",
+        "        const key = JSON.stringify(args);",
+        "",
+        "        if (key in cache) {",
+        "            return cache[key];",
+        "        }",
+        "",
+        "        cache[key] = fn(...args);",
+        "        return cache[key];",
+        "    };",
+        "};",
+        "",
+        "const square = memoize((n) => n * n);",
+        "console.log(square(9), square(9));"
+      ]
+    ]
+  },
+  "python": {
+    "easy": [
+      [
+        "name = \"Alex\"",
+        "age = 20",
+        "",
+        "print(\"Name:\", name)",
+        "print(\"Age:\", age)"
+      ],
+      [
+        "numbers = [1, 2, 3, 4, 5]",
+        "",
+        "total = sum(numbers)",
+        "",
+        "print(total)"
+      ],
+      [
+        "def is_even(number):",
+        "    return number % 2 == 0",
+        "",
+        "print(is_even(10))"
+      ],
+      [
+        "for number in range(1, 6):",
+        "    print(number)"
+      ]
+    ],
+    "medium": [
+      [
+        "def fibonacci(n):",
+        "    a, b = 0, 1",
+        "",
+        "    for _ in range(n):",
+        "        a, b = b, a + b",
+        "",
+        "    return a"
+      ],
+      [
+        "class Stack:",
+        "    def __init__(self):",
+        "        self.items = []",
+        "",
+        "    def push(self, item):",
+        "        self.items.append(item)",
+        "",
+        "    def pop(self):",
+        "        if not self.items:",
+        "            return None",
+        "",
+        "        return self.items.pop()"
+      ],
+      [
+        "def count_words(text):",
+        "    words = text.lower().split()",
+        "    counts = {}",
+        "",
+        "    for word in words:",
+        "        counts[word] = counts.get(word, 0) + 1",
+        "",
+        "    return counts"
+      ],
+      [
+        "numbers = [4, 8, 15, 16, 23, 42]",
+        "",
+        "even_numbers = [",
+        "    number",
+        "    for number in numbers",
+        "    if number % 2 == 0",
+        "]",
+        "",
+        "print(even_numbers)"
+      ]
+    ],
+    "hard": [
+      [
+        "import time",
+        "from functools import wraps",
+        "",
+        "def timer(func):",
+        "    @wraps(func)",
+        "    def wrapper(*args, **kwargs):",
+        "        start = time.perf_counter()",
+        "        result = func(*args, **kwargs)",
+        "        elapsed = time.perf_counter() - start",
+        "        print(f\"{func.__name__} took {elapsed:.4f}s\")",
+        "        return result",
+        "    return wrapper"
+      ],
+      [
+        "def binary_search(items: list[int], target: int) -> int:",
+        "    low, high = 0, len(items) - 1",
+        "",
+        "    while low <= high:",
+        "        mid = (low + high) // 2",
+        "",
+        "        if items[mid] == target:",
+        "            return mid",
+        "        elif items[mid] < target:",
+        "            low = mid + 1",
+        "        else:",
+        "            high = mid - 1",
+        "",
+        "    return -1"
+      ],
+      [
+        "def top_words(text, limit=3):",
+        "    counts = {}",
+        "",
+        "    for word in text.lower().split():",
+        "        word = word.strip(\".,!?\")",
+        "        counts[word] = counts.get(word, 0) + 1",
+        "",
+        "    ranked = sorted(counts.items(), key=lambda pair: (-pair[1], pair[0]))",
+        "    return [word for word, _ in ranked[:limit]]"
+      ],
+      [
+        "def read_lines(path):",
+        "    try:",
+        "        with open(path, encoding=\"utf-8\") as file:",
+        "            for number, line in enumerate(file, start=1):",
+        "                yield number, line.rstrip(\"\\n\")",
+        "    except FileNotFoundError:",
+        "        print(f\"File not found: {path}\")"
+      ]
+    ]
+  },
+  "java": {
+    "easy": [
+      [
+        "public class Main {",
+        "    public static void main(String[] args) {",
+        "        System.out.println(\"Hello, World!\");",
+        "    }",
+        "}"
+      ],
+      [
+        "public class Calculator {",
+        "    public int add(int a, int b) {",
+        "        return a + b;",
+        "    }",
+        "}"
+      ],
+      [
+        "public class Counter {",
+        "    private int count = 0;",
+        "",
+        "    public void increment() {",
+        "        count++;",
+        "    }",
+        "",
+        "    public int getCount() {",
+        "        return count;",
+        "    }",
+        "}"
+      ],
+      [
+        "public class Main {",
+        "    public static void main(String[] args) {",
+        "        for (int i = 1; i <= 5; i++) {",
+        "            System.out.println(i);",
+        "        }",
+        "    }",
+        "}"
+      ]
+    ],
+    "medium": [
+      [
+        "public class Calculator {",
+        "",
+        "    public int factorial(int n) {",
+        "        if (n <= 1) {",
+        "            return 1;",
+        "        }",
+        "",
+        "        return n * factorial(n - 1);",
+        "    }",
+        "}"
+      ],
+      [
+        "import java.util.ArrayList;",
+        "import java.util.List;",
+        "",
+        "public class Main {",
+        "    public static void main(String[] args) {",
+        "        List<String> names = new ArrayList<>();",
+        "",
+        "        names.add(\"Alex\");",
+        "        names.add(\"Sam\");",
+        "        names.add(\"John\");",
+        "",
+        "        for (String name : names) {",
+        "            System.out.println(name);",
+        "        }",
+        "    }",
+        "}"
+      ],
+      [
+        "public class BankAccount {",
+        "    private double balance;",
+        "",
+        "    public BankAccount(double balance) {",
+        "        this.balance = balance;",
+        "    }",
+        "",
+        "    public void deposit(double amount) {",
+        "        if (amount > 0) {",
+        "            balance += amount;",
+        "        }",
+        "    }",
+        "",
+        "    public double getBalance() {",
+        "        return balance;",
+        "    }",
+        "}"
+      ],
+      [
+        "public class Search {",
+        "",
+        "    public static int find(int[] numbers, int target) {",
+        "        for (int i = 0; i < numbers.length; i++) {",
+        "            if (numbers[i] == target) {",
+        "                return i;",
+        "            }",
+        "        }",
+        "",
+        "        return -1;",
+        "    }",
+        "}"
+      ]
+    ],
+    "hard": [
+      [
+        "import java.util.ArrayList;",
+        "import java.util.List;",
+        "",
+        "public class Inventory {",
+        "    private final List<String> items = new ArrayList<>();",
+        "",
+        "    public void add(String item) {",
+        "        if (item == null || item.isBlank()) {",
+        "            throw new IllegalArgumentException(\"Item is empty\");",
+        "        }",
+        "",
+        "        items.add(item.trim());",
+        "    }",
+        "",
+        "    public int count() {",
+        "        return items.size();",
+        "    }",
+        "}"
+      ],
+      [
+        "import java.util.HashMap;",
+        "import java.util.Map;",
+        "",
+        "public class Fibonacci {",
+        "    private static final Map<Integer, Long> memo = new HashMap<>();",
+        "",
+        "    public static long fib(int n) {",
+        "        if (n <= 1) {",
+        "            return n;",
+        "        }",
+        "",
+        "        if (memo.containsKey(n)) {",
+        "            return memo.get(n);",
+        "        }",
+        "",
+        "        long result = fib(n - 1) + fib(n - 2);",
+        "        memo.put(n, result);",
+        "        return result;",
+        "    }",
+        "}"
+      ],
+      [
+        "public static int parsePositive(String text) {",
+        "    try {",
+        "        int value = Integer.parseInt(text.trim());",
+        "",
+        "        if (value <= 0) {",
+        "            throw new IllegalArgumentException(\"Must be positive\");",
+        "        }",
+        "",
+        "        return value;",
+        "    } catch (NumberFormatException e) {",
+        "        System.out.println(\"Not a number: \" + text);",
+        "        return -1;",
+        "    } finally {",
+        "        System.out.println(\"Parsed: \" + text);",
+        "    }",
+        "}"
+      ],
+      [
+        "public static void bubbleSort(int[] numbers) {",
+        "    for (int i = 0; i < numbers.length - 1; i++) {",
+        "        for (int j = 0; j < numbers.length - i - 1; j++) {",
+        "            if (numbers[j] > numbers[j + 1]) {",
+        "                int temp = numbers[j];",
+        "                numbers[j] = numbers[j + 1];",
+        "                numbers[j + 1] = temp;",
+        "            }",
+        "        }",
+        "    }",
+        "}"
+      ]
+    ]
+  },
+  "sql": {
+    "easy": [
+      [
+        "SELECT *",
+        "FROM customers;"
+      ],
+      [
+        "SELECT name, email",
+        "FROM customers",
+        "WHERE age >= 18;"
+      ],
+      [
+        "INSERT INTO users (name, email)",
+        "VALUES ('Alex', 'alex@example.com');"
+      ],
+      [
+        "UPDATE products",
+        "SET price = price * 1.1",
+        "WHERE category = 'electronics';"
+      ]
+    ],
+    "medium": [
+      [
+        "SELECT customers.name, COUNT(orders.id) AS total",
+        "FROM customers",
+        "JOIN orders",
+        "    ON orders.customer_id = customers.id",
+        "GROUP BY customers.name",
+        "ORDER BY total DESC;"
+      ],
+      [
+        "SELECT category, AVG(price) AS average_price",
+        "FROM products",
+        "GROUP BY category",
+        "HAVING AVG(price) > 100",
+        "ORDER BY average_price DESC;"
+      ],
+      [
+        "SELECT users.name, orders.total",
+        "FROM users",
+        "JOIN orders",
+        "    ON users.id = orders.user_id",
+        "WHERE orders.total > 100",
+        "ORDER BY orders.total DESC;"
+      ],
+      [
+        "SELECT department, COUNT(*) AS employees",
+        "FROM employees",
+        "GROUP BY department",
+        "ORDER BY employees DESC;"
+      ]
+    ],
+    "hard": [
+      [
+        "SELECT c.name, COUNT(o.id) AS orders, SUM(o.total) AS revenue",
+        "FROM customers c",
+        "LEFT JOIN orders o ON o.customer_id = c.id",
+        "WHERE o.created_at >= '2026-01-01'",
+        "GROUP BY c.name",
+        "HAVING SUM(o.total) > 500",
+        "ORDER BY revenue DESC",
+        "LIMIT 10;"
+      ],
+      [
+        "SELECT name, salary",
+        "FROM employees",
+        "WHERE salary > (",
+        "    SELECT AVG(salary)",
+        "    FROM employees",
+        "    WHERE department = 'Engineering'",
+        ")",
+        "ORDER BY salary DESC;"
+      ],
+      [
+        "SELECT name,",
+        "    CASE",
+        "        WHEN score >= 90 THEN 'A'",
+        "        WHEN score >= 75 THEN 'B'",
+        "        ELSE 'C'",
+        "    END AS grade",
+        "FROM students",
+        "WHERE active = 1",
+        "ORDER BY score DESC;"
+      ],
+      [
+        "WITH monthly AS (",
+        "    SELECT strftime('%Y-%m', created_at) AS month, SUM(total) AS revenue",
+        "    FROM orders",
+        "    GROUP BY month",
+        ")",
+        "SELECT month, revenue",
+        "FROM monthly",
+        "WHERE revenue > 1000",
+        "ORDER BY month;"
+      ]
+    ]
+  }
+}

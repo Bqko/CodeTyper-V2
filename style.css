@@ -1,0 +1,1593 @@
+/* ==========================================================
+   1. DESIGN TOKENS / CSS VARIABLES
+   These variables store the main colors and fonts used
+   throughout the website.
+
+   Instead of writing the same color/font many times, we
+   define it once here and reuse it with var(...).
+   ========================================================== */
+
+:root {
+  --paper: #ffffffbe;
+  --surface: #FFFFFF;
+  --ink: #1F2421;
+  --ink-soft: #4A4F49;
+  --rule: #D3CFC3;
+  --stamp: #3F6D4E;
+  --stamp-dark: #2E5138;
+  --clay: #8A6E52;
+  --error: #C0392B;
+
+  /* Syntax colours for code that has not been typed yet. */
+  --tok-kw:  #8250A8;
+  --tok-str: #A0622D;
+  --tok-num: #2F7F8F;
+  --tok-com: #6F746D;
+  --tok-fn:  #3F6D4E;
+  --tok-cls: #2F6FA3;
+
+  /* Gold, used by the top rank. */
+  --gold: #C98F12;
+
+  --serif: "Fraunces", "Iowan Old Style", serif;
+  --sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono: "JetBrains Mono", "SF Mono", Consolas, monospace;
+}
+
+
+/* ==========================================================
+   2. DARK MODE VARIABLES
+   When <html> has data-theme="dark", these values replace
+   the normal colors above.
+
+   JavaScript changes data-theme when the Dark Mode button
+   is clicked.
+   ========================================================== */
+
+[data-theme="dark"] {
+  --paper: #17181A;
+  --surface: #202225;
+  --ink: #EDEDEC;
+  --ink-soft: #A0A3A8;
+  --rule: #3A3C40;
+  --stamp: #6FBF8B;
+  --stamp-dark: #8FD3A6;
+  --clay: #A0A3A8;
+  --error: #E0665A;
+
+  --tok-kw:  #C39BE0;
+  --tok-str: #E0A878;
+  --tok-num: #7CCBD6;
+  --tok-com: #8A8E94;
+  --tok-fn:  #8FD3A6;
+  --tok-cls: #7FB4E6;
+
+  --gold: #F5C84C;
+}
+
+
+/* ==========================================================
+   3. GLOBAL / BASIC STYLES
+   These rules affect elements across the whole page.
+   ========================================================== */
+
+/* Make width/height calculations easier by including
+   padding and borders inside an element's size. */
+* {
+  box-sizing: border-box;
+}
+
+
+/* Main page/body styling. */
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+
+/* Heading styles. */
+h1, h2, h3 {
+  font-family: var(--serif);
+  font-weight: 500;
+  color: var(--ink);
+  margin: 0;
+}
+
+
+/* ==========================================================
+   4. BUTTONS AND SELECT MENUS
+   General appearance shared by buttons and dropdowns.
+   ========================================================== */
+
+button, select {
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: none;
+  border-radius: 3px;
+  padding: 0.75rem 1.5rem;
+
+  /* Makes hover/focus changes animate smoothly. */
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+
+/* Visible keyboard focus outline for accessibility. */
+button:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--stamp);
+  outline-offset: 3px;
+}
+
+
+/* Primary button: green filled button. */
+.btn-primary {
+  background: var(--stamp);
+  color: #fff;
+}
+
+
+/* Dark mode: the green is light, so use dark text on it. */
+[data-theme="dark"] .btn-primary {
+  color: #17181A;
+}
+
+
+/* Primary button when the mouse is over it. */
+.btn-primary:hover {
+  background: var(--stamp-dark);
+}
+
+
+/* Secondary button: transparent button with a border. */
+.btn-secondary {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--rule);
+}
+
+
+/* Secondary button when the mouse is over it. */
+.btn-secondary:hover {
+  border-color: var(--ink-soft);
+}
+
+
+/* ==========================================================
+   5. COMMON PAGE CONTAINERS
+   Controls the maximum width and horizontal spacing of
+   sections, header, and footer.
+   ========================================================== */
+
+section, header, footer {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+
+/* ==========================================================
+   6. HEADER / NAVIGATION
+   Controls the top navigation bar and CodeType logo.
+   ========================================================== */
+
+header {
+  max-width: none;
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper);
+}
+
+
+/* Navigation layout:
+   - flex puts logo and button on one row
+   - space-between pushes them to opposite sides */
+nav {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 1.25rem 2rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+
+/* CodeType logo. */
+.logo {
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+
+/* ==========================================================
+   7. MAIN APPLICATION AREA
+   Controls the main typing-practice section.
+   ========================================================== */
+
+.app {
+  padding: 3.5rem 2rem 5rem;
+  max-width: 900px;
+  margin: 0 auto;
+
+  /* Centers the heading and subtitle. */
+  text-align: center;
+}
+
+
+/* Subtitle under "Practice Typing Code". */
+.app > p.sub {
+  margin: 0.5rem auto 2.5rem;
+  color: var(--ink-soft);
+
+  /* Limits the line length so the paragraph is easier to read. */
+  max-width: 56ch;
+}
+
+
+/* ==========================================================
+   8. CONTROLS
+   Controls the language dropdown, difficulty dropdown,
+   and Generate Snippet button.
+   ========================================================== */
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+
+/* Language and difficulty dropdowns. */
+.controls select {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--rule);
+}
+
+
+/* Auto-indent checkbox and its label. */
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  padding: 0.75rem 0.5rem;
+  font-size: 0.95rem;
+  color: var(--ink);
+
+  cursor: pointer;
+  user-select: none;
+}
+
+
+.toggle input {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  cursor: pointer;
+
+  /* Uses the site's green for the checked state. */
+  accent-color: var(--stamp);
+}
+
+
+/* Allows an element with class "grow" to take remaining
+   horizontal space if needed. */
+.controls .grow {
+  flex: 1;
+}
+
+
+/* ==========================================================
+   9. LIVE STATISTICS
+   Controls Time, WPM, Accuracy, and Errors shown above
+   the code box.
+   ========================================================== */
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+
+  /* Statistics use a coding-style monospace font. */
+  font-family: var(--mono);
+  font-size: 0.9rem;
+}
+
+
+/* Labels such as "Time:" and "WPM:". */
+.stats .stat {
+  color: var(--ink-soft);
+}
+
+
+/* Numbers such as "0", "100%", etc. */
+.stats .stat b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+
+/* ==========================================================
+   10. CODE CONTAINER
+   The wrapper allows the overlay to sit on top of the
+   code display.
+   ========================================================== */
+
+.code-wrap {
+  position: relative;
+}
+
+
+/* ==========================================================
+   11. CODE DISPLAY
+   This is the large box containing the code the user needs
+   to type.
+   ========================================================== */
+
+.code-display {
+  position: relative;
+  text-align: left;
+  margin: 0;
+  padding: 1.75rem 2rem;
+
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--surface);
+
+  /* Code uses a monospace font. */
+  font-family: var(--mono);
+  font-size: 1.05rem;
+  line-height: 1.7;
+
+
+  /* --------------------------------------------------------
+     PRESERVE CODE FORMATTING
+     -------------------------------------------------------- */
+
+  /* Keeps spaces and line breaks in the code. */
+  white-space: pre-wrap;
+
+  /* Prevents long words/code from being broken unnecessarily. */
+  overflow-wrap: normal;
+  word-break: normal;
+
+
+  /* --------------------------------------------------------
+     SCROLLING
+     -------------------------------------------------------- */
+
+  /* Adds horizontal scrolling when a line is too long. */
+  overflow-x: auto;
+
+  /* Allows vertical scrolling if the code becomes tall. */
+  overflow-y: auto;
+
+
+  outline: none;
+
+  /* Gives the code box a minimum height. */
+  min-height: 9em;
+}
+
+
+/* Changes the border when the code box is focused. */
+.code-display:focus {
+  border-color: var(--stamp);
+}
+
+
+/* ==========================================================
+   12. CHARACTER STATES
+   Each character in the code gets one of these classes:
+   pending, correct, or incorrect.
+   ========================================================== */
+
+/* Character the user has not typed yet. */
+.code-display span.pending {
+  color: var(--ink-soft);
+}
+
+
+/* Syntax colours: only for characters that are still pending.
+   Once typed, a character becomes plain "correct" (or "incorrect"),
+   so the colour change shows how far you have got. */
+.code-display span.pending[data-t="kw"]  { color: var(--tok-kw); }
+.code-display span.pending[data-t="str"] { color: var(--tok-str); }
+.code-display span.pending[data-t="num"] { color: var(--tok-num); }
+.code-display span.pending[data-t="com"] { color: var(--tok-com); }
+.code-display span.pending[data-t="fn"]  { color: var(--tok-fn); }
+.code-display span.pending[data-t="cls"] { color: var(--tok-cls); }
+
+
+/* Character typed correctly. */
+.code-display span.correct {
+  color: var(--ink);
+}
+
+
+/* Character typed incorrectly. */
+.code-display span.incorrect {
+  color: var(--error);
+  background: color-mix(in srgb, var(--error) 15%, transparent);
+  border-radius: 2px;
+}
+
+
+/* ==========================================================
+   13. TYPING CARET
+   Creates the vertical line showing where the next
+   character will be typed.
+   ========================================================== */
+
+.typing-caret {
+  display: inline-block;
+
+  /* Width is 0 because the border creates the visible line. */
+  width: 0;
+
+  height: 1.25em;
+
+  border-left: 3px solid var(--stamp);
+
+  margin-left: -1px;
+  vertical-align: text-bottom;
+
+  /* Runs the blinking animation continuously.
+     step-end = the caret is VISIBLE first, then hides.
+     (step-start did the opposite: it started hidden, and because
+     the caret is re-inserted on every keystroke, the animation
+     restarted each time and the caret was invisible while typing.) */
+  animation: caret-blink 0.8s step-end infinite;
+}
+
+
+/* Defines the blinking animation.
+   Visible for the first half of each cycle, hidden for the second. */
+@keyframes caret-blink {
+  0%   { opacity: 1; }
+  50%  { opacity: 0; }
+}
+
+
+/* ==========================================================
+   14. START TYPING OVERLAY
+   The overlay says "Click here, then start typing" before
+   the user focuses the code box.
+   ========================================================== */
+
+.overlay {
+  position: absolute;
+
+  /* Makes the overlay cover the entire code container. */
+  inset: 0;
+
+  /* Hidden by default. */
+  display: none;
+
+  /* Centers the message horizontally and vertically. */
+  align-items: center;
+  justify-content: center;
+
+  /* Places the two text lines vertically. */
+  flex-direction: column;
+
+  gap: 0.5rem;
+
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+
+  border-radius: 6px;
+  text-align: center;
+  padding: 1rem;
+}
+
+
+/* JavaScript adds "show" when the overlay should appear. */
+.overlay.show {
+  display: flex;
+}
+
+
+/* Smaller subtitle inside the overlay. */
+.overlay span {
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+
+
+/* ==========================================================
+   14B. PROGRESS BAR
+   Thin bar under the code box. JavaScript sets the width of
+   .progress-fill (0% to 100%) as you type.
+   ========================================================== */
+
+.progress {
+  height: 6px;
+  margin-top: 0.75rem;
+
+  border-radius: 999px;
+  background: var(--rule);
+
+  /* Keeps the fill inside the rounded ends. */
+  overflow: hidden;
+}
+
+
+.progress-fill {
+  width: 0;
+  height: 100%;
+
+  background: var(--stamp);
+  border-radius: 999px;
+
+  /* Smooth growth between keystrokes. */
+  transition: width 0.12s ease;
+}
+
+
+/* ==========================================================
+   15. RESULTS PANEL
+   Appears after the user finishes typing.
+   Shows final WPM, accuracy, time, and errors.
+   ========================================================== */
+
+.result {
+  /* Hidden until JavaScript adds the .show class. */
+  display: none;
+
+  margin-top: 1.5rem;
+  padding: 1.5rem 2rem;
+
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--surface);
+
+  /* Layout: statistics on the left, "Try Another" on the right. */
+  align-items: center;
+  justify-content: space-between;
+
+  flex-wrap: wrap;
+  gap: 1.5rem;
+
+  text-align: left;
+}
+
+
+/* JavaScript adds .show when the test is finished. */
+.result.show {
+  display: flex;
+}
+
+
+/* The statistics sit side by side in one row
+   (they wrap onto a second row if there is not enough space). */
+.result-stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1.5rem 3rem;
+}
+
+
+/* Aligns individual result blocks. */
+.result-stats div {
+  text-align: left;
+}
+
+
+/* Large result number, e.g. "52" WPM. */
+.result-stats .n {
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+
+/* Small result label, e.g. "WPM". */
+.result-stats .l {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+
+/* ----------------------------------------------------------
+   RESULT CHART
+   Speed-over-time chart drawn by JavaScript (SVG).
+   It takes the full width, so it wraps below the stats/button.
+   ---------------------------------------------------------- */
+
+.result-chart {
+  width: 100%;
+  flex: none;
+
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+}
+
+
+.chart-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+
+/* Little red dot in the legend. */
+.chart-legend .dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 0.4rem;
+
+  border-radius: 50%;
+  background: var(--error);
+}
+
+
+.result-chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+
+.chart-grid {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+
+
+.chart-label {
+  fill: var(--ink-soft);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+
+.chart-line {
+  fill: none;
+  stroke: var(--stamp);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+
+.chart-dot {
+  fill: var(--error);
+  stroke: var(--surface);
+  stroke-width: 1.5;
+}
+
+
+/* Hover guide: hidden until the mouse is over the chart. */
+.result-chart svg {
+  cursor: crosshair;
+}
+
+
+.chart-hover {
+  opacity: 0;
+
+  /* Never block the mouse, so the red dots' tooltips still work. */
+  pointer-events: none;
+}
+
+
+.chart-hover.on {
+  opacity: 1;
+}
+
+
+/* Vertical line at the hovered point. */
+.chart-guide {
+  stroke: var(--ink-soft);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+
+/* Dot on the speed line at the hovered point. */
+.chart-hover-dot {
+  fill: var(--stamp);
+  stroke: var(--surface);
+  stroke-width: 2;
+}
+
+
+/* Label above the chart. The thick outline in the background colour
+   keeps it readable if it crosses the guide or gridlines. */
+.chart-tip {
+  fill: var(--ink);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+
+  stroke: var(--surface);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+  paint-order: stroke;
+}
+
+
+/* ==========================================================
+   15B. FINISH ANIMATIONS
+   Played when you finish a snippet. If the user prefers reduced
+   motion, section 18 turns all of these off, and everything
+   simply appears.
+   ========================================================== */
+
+/* The results panel slides up and fades in. */
+.result.show {
+  animation: result-in 0.5s ease-out both;
+}
+
+
+@keyframes result-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+
+/* A green ring spreads out from the code box. */
+.code-display.finish-pulse {
+  animation: finish-pulse 0.9s ease-out;
+}
+
+
+@keyframes finish-pulse {
+  from {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--stamp) 45%, transparent);
+  }
+
+  to {
+    box-shadow: 0 0 0 16px transparent;
+  }
+}
+
+
+/* The chart line draws itself from left to right.
+   JavaScript sets --len (the length of the line). */
+.chart-line {
+  animation: chart-draw 1s linear 0.3s backwards;
+}
+
+
+@keyframes chart-draw {
+  from {
+    stroke-dasharray: var(--len) calc(var(--len) * 2);
+    stroke-dashoffset: var(--len);
+  }
+
+  to {
+    stroke-dasharray: var(--len) calc(var(--len) * 2);
+    stroke-dashoffset: 0;
+  }
+}
+
+
+/* Mistake dots pop in once the line reaches them.
+   JavaScript sets each dot's animation-delay. */
+.chart-dot {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: dot-pop 0.35s ease-out backwards;
+}
+
+
+@keyframes dot-pop {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+
+  60% {
+    transform: scale(1.4);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+/* ==========================================================
+   15C. RANK REVEAL
+   The game-style rank at the top of the results panel.
+   JavaScript sets data-tier on #result (grandma, slow, average,
+   good, great or godlike) and the --reveal delay on #result-rank,
+   and CSS does the rest. Reduced motion turns all of it off.
+   ========================================================== */
+
+.result-rank {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+
+  width: 100%;
+  flex: none;
+
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+}
+
+
+/* The picture. "isolate" keeps the glow rays behind it. */
+.rank-art {
+  position: relative;
+  isolation: isolate;
+  flex: none;
+
+  width: 128px;
+  height: 128px;
+}
+
+
+.rank-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+
+.rank-text {
+  min-width: 0;
+}
+
+
+.rank-kicker {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+
+.rank-title {
+  margin: 0.25rem 0 0.4rem;
+
+  font-family: var(--serif);
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+
+.rank-line {
+  max-width: 46ch;
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+
+/* Title colour for each rank. */
+[data-tier="grandma"] .rank-title { color: var(--ink-soft); }
+[data-tier="slow"]    .rank-title { color: var(--clay); }
+[data-tier="average"] .rank-title { color: var(--ink); }
+[data-tier="good"]    .rank-title { color: var(--stamp); }
+[data-tier="great"]   .rank-title { color: var(--tok-cls); }
+[data-tier="godlike"] .rank-title { color: var(--gold); }
+
+
+/* ---------- Text appears after the picture ---------- */
+
+.rank-kicker {
+  animation: rank-fade-up 0.4s ease-out calc(var(--reveal, 0.9s) + 0.05s) backwards;
+}
+
+.rank-title {
+  animation: rank-fade-up 0.5s ease-out calc(var(--reveal, 0.9s) + 0.15s) backwards;
+}
+
+.rank-line {
+  animation: rank-fade-up 0.5s ease-out calc(var(--reveal, 0.9s) + 0.35s) backwards;
+}
+
+
+@keyframes rank-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+
+/* ---------- How the picture arrives (one style per rank) ---------- */
+
+/* Default (average, good, very good): pops in with a little overshoot. */
+.rank-art {
+  animation: rank-pop 0.6s cubic-bezier(0.2, 1.5, 0.4, 1) var(--reveal, 0.9s) backwards;
+}
+
+@keyframes rank-pop {
+  from {
+    opacity: 0;
+    transform: scale(0) rotate(-12deg);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+
+/* Grandma: fades in slowly, like she is not in a hurry. */
+[data-tier="grandma"] .rank-art {
+  animation: rank-fade-up 1.2s ease-out var(--reveal, 0.9s) backwards;
+}
+
+
+/* Slow: the turtle crawls in from the left. */
+[data-tier="slow"] .rank-art {
+  animation: rank-crawl 1.8s ease-out var(--reveal, 0.9s) backwards;
+}
+
+@keyframes rank-crawl {
+  from {
+    opacity: 0;
+    transform: translateX(-90px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+
+/* Godlike: slams down from big and shakes the whole rank block. */
+[data-tier="godlike"] .rank-art {
+  animation: rank-slam 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) var(--reveal, 0.9s) backwards;
+}
+
+@keyframes rank-slam {
+  from {
+    opacity: 0;
+    transform: scale(3.2);
+  }
+
+  70% {
+    opacity: 1;
+    transform: scale(0.92);
+  }
+
+  to {
+    transform: scale(1);
+  }
+}
+
+
+[data-tier="godlike"] .result-rank {
+  animation: rank-shake 0.5s ease-in-out calc(var(--reveal, 0.9s) + 0.2s);
+}
+
+@keyframes rank-shake {
+  0%, 100% { transform: translateX(0); }
+  15%      { transform: translateX(-7px); }
+  35%      { transform: translateX(6px); }
+  55%      { transform: translateX(-4px); }
+  75%      { transform: translateX(3px); }
+}
+
+
+/* ---------- What the picture does afterwards (idle motion) ---------- */
+
+/* Grandma sways gently. */
+[data-tier="grandma"] .rank-img {
+  transform-origin: 50% 100%;
+  animation: rank-sway 3.2s ease-in-out calc(var(--reveal, 0.9s) + 1.2s) infinite;
+}
+
+@keyframes rank-sway {
+  0%, 100% { transform: rotate(-4deg); }
+  50%      { transform: rotate(4deg); }
+}
+
+
+/* The turtle bobs very slowly. */
+[data-tier="slow"] .rank-img {
+  animation: rank-bob 2.4s ease-in-out calc(var(--reveal, 0.9s) + 1.8s) infinite;
+}
+
+@keyframes rank-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+
+
+/* Good: bounces three times. */
+[data-tier="good"] .rank-img {
+  animation: rank-bounce 0.6s ease-out calc(var(--reveal, 0.9s) + 0.6s) 3;
+}
+
+@keyframes rank-bounce {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-14px); }
+}
+
+
+/* Very good and godlike: float up and down, with a glow. */
+[data-tier="great"] .rank-img,
+[data-tier="godlike"] .rank-img {
+  animation: rank-float 2.6s ease-in-out calc(var(--reveal, 0.9s) + 0.6s) infinite;
+}
+
+@keyframes rank-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+[data-tier="great"] .rank-img {
+  filter: drop-shadow(0 6px 14px color-mix(in srgb, var(--tok-cls) 55%, transparent));
+}
+
+[data-tier="godlike"] .rank-img {
+  filter: drop-shadow(0 0 16px color-mix(in srgb, var(--gold) 75%, transparent));
+}
+
+
+/* ---------- Godlike extras ---------- */
+
+/* Golden rays that slowly spin behind the picture. */
+[data-tier="godlike"] .rank-art::before {
+  content: "";
+  position: absolute;
+  inset: -60px;
+  z-index: -1;
+  border-radius: 50%;
+
+  background: repeating-conic-gradient(
+    color-mix(in srgb, var(--gold) 40%, transparent) 0deg 8deg,
+    transparent 8deg 24deg
+  );
+
+  /* Fade the rays out towards the edge. */
+  -webkit-mask-image: radial-gradient(circle, #000 25%, transparent 68%);
+  mask-image: radial-gradient(circle, #000 25%, transparent 68%);
+
+  animation:
+    rank-rays-in 0.6s ease-out var(--reveal, 0.9s) backwards,
+    rank-spin 16s linear var(--reveal, 0.9s) infinite;
+}
+
+@keyframes rank-rays-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes rank-spin {
+  to { transform: rotate(360deg); }
+}
+
+
+/* The title glows. */
+[data-tier="godlike"] .rank-title {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+
+  animation:
+    rank-fade-up 0.5s ease-out calc(var(--reveal, 0.9s) + 0.15s) backwards,
+    rank-glow 2s ease-in-out calc(var(--reveal, 0.9s) + 0.8s) infinite;
+}
+
+@keyframes rank-glow {
+  0%, 100% { text-shadow: 0 0 6px color-mix(in srgb, var(--gold) 30%, transparent); }
+  50%      { text-shadow: 0 0 22px color-mix(in srgb, var(--gold) 80%, transparent); }
+}
+
+
+/* ---------- Confetti ---------- */
+
+/* The burst starts at the centre of the picture. */
+.rank-burst {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+
+.rank-burst i {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  border-radius: 2px;
+
+  /* Invisible until its animation starts (JS sets the delay). */
+  opacity: 0;
+  animation: confetti 1.6s ease-out forwards;
+}
+
+
+/* Up and out first, then falling down while spinning and fading. */
+@keyframes confetti {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  40% {
+    opacity: 1;
+    transform: translate(var(--px), var(--py)) rotate(calc(var(--rot) * 0.5));
+    animation-timing-function: ease-in;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) rotate(var(--rot));
+  }
+}
+
+
+/* ==========================================================
+   15D. EMOJIS RISING FROM THE BOTTOM
+   A transparent layer that covers the whole screen. JavaScript
+   adds one <span> per emoji (see spawnEmojis in practice.html).
+   ========================================================== */
+
+.emoji-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  /* Emojis that leave the screen must not create scrollbars. */
+  overflow: hidden;
+
+  /* The layer never blocks clicks on the page underneath. */
+  pointer-events: none;
+}
+
+
+.emoji-layer span {
+  position: absolute;
+
+  /* Starts just below the bottom edge of the screen. */
+  bottom: -60px;
+
+  line-height: 1;
+  user-select: none;
+
+  /* Invisible until its animation starts (JavaScript sets the delay). */
+  opacity: 0;
+  animation: emoji-rise 3s ease-out forwards;
+}
+
+
+/* Pops up quickly, then drifts upwards while fading out.
+   --rise, --drift and --tilt are set per emoji by JavaScript. */
+@keyframes emoji-rise {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.4) rotate(0deg);
+  }
+
+  12% {
+    opacity: 1;
+    transform:
+      translate(calc(var(--drift) * 0.1), calc(var(--rise) * -0.12))
+      scale(1.25)
+      rotate(calc(var(--tilt) * 0.2));
+  }
+
+  70% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform:
+      translate(var(--drift), calc(var(--rise) * -1))
+      scale(1)
+      rotate(var(--tilt));
+  }
+}
+
+
+/* ==========================================================
+   16. FOOTER
+   Controls the bottom part of the page.
+   ========================================================== */
+
+footer {
+  max-width: none;
+  border-top: 1px solid var(--rule);
+  padding: 2rem;
+  text-align: center;
+}
+
+
+/* Footer copyright text. */
+footer p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+
+
+/* ==========================================================
+   16B. NAVIGATION LINKS AND LINK-BUTTONS
+   Used by the header on both pages, and by the buttons on
+   the home page (they are links <a>, not <button>).
+   ========================================================== */
+
+/* Let the header wrap on very small screens. */
+nav {
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+}
+
+
+/* The logo is now a link, so remove the default link look. */
+a.logo {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+
+/* Home / Practice links + the theme button. */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+
+.nav-links a {
+  color: var(--ink-soft);
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+
+.nav-links a:hover {
+  color: var(--ink);
+}
+
+
+/* The page you are on gets a green underline. */
+.nav-links a[aria-current="page"] {
+  color: var(--ink);
+  border-bottom: 2px solid var(--stamp);
+  padding-bottom: 2px;
+}
+
+
+/* Keyboard focus outline for links. */
+a:focus-visible {
+  outline: 2px solid var(--stamp);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+
+/* A link that looks like a button.
+   Combine with .btn-primary or .btn-secondary. */
+a.btn {
+  display: inline-block;
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  text-decoration: none;
+
+  border-radius: 3px;
+  padding: 0.75rem 1.5rem;
+
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+
+/* Smooth scrolling for the "How it works" link
+   (only if the user has not asked for reduced motion). */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+
+/* ==========================================================
+   16C. HOME PAGE
+   Hero, feature cards, steps, and the final call to action.
+   ========================================================== */
+
+/* ---------- Hero (top of the page) ---------- */
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  align-items: center;
+  gap: 3rem;
+
+  padding-top: 4.5rem;
+  padding-bottom: 4.5rem;
+}
+
+
+/* Small line above the headline. */
+.kicker {
+  margin: 0 0 1rem;
+
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--stamp);
+}
+
+
+.hero h1 {
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+
+.lead {
+  max-width: 46ch;
+  margin: 1.25rem 0 2rem;
+
+  font-size: 1.1rem;
+  color: var(--ink-soft);
+}
+
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+
+/* Row of language "chips". */
+.langs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
+  list-style: none;
+  margin: 2rem 0 0;
+  padding: 0;
+}
+
+
+.langs li {
+  padding: 0.25rem 0.75rem;
+
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+
+/* The preview uses the real .stats and .code-display styles,
+   so it always matches the practice page. */
+.hero-demo .stats {
+  justify-content: flex-start;
+}
+
+
+.hero-demo .code-display {
+  cursor: default;
+}
+
+
+/* ---------- Sections below the hero ---------- */
+
+.home-section {
+  padding-top: 3.5rem;
+  padding-bottom: 3.5rem;
+}
+
+
+.section-title {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+
+.section-sub {
+  max-width: 60ch;
+  margin: 0 0 2rem;
+  color: var(--ink-soft);
+}
+
+
+/* ---------- Feature cards ---------- */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1.25rem;
+}
+
+
+.card {
+  padding: 1.5rem;
+
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+
+.card h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1.15rem;
+}
+
+
+.card p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+
+
+/* ---------- Numbered steps ---------- */
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+
+  list-style: none;
+  margin: 2rem 0 0;
+  padding: 0;
+
+  /* Counter used to draw the big 1, 2, 3. */
+  counter-reset: step;
+}
+
+
+.steps li::before {
+  counter-increment: step;
+  content: counter(step);
+
+  display: block;
+  margin-bottom: 0.75rem;
+
+  font-family: var(--serif);
+  font-size: 2.2rem;
+  line-height: 1;
+  color: var(--stamp);
+}
+
+
+.steps h3 {
+  margin-bottom: 0.4rem;
+  font-size: 1.15rem;
+}
+
+
+.steps p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+
+
+/* ---------- Final call to action ---------- */
+
+.cta-panel {
+  padding: 3rem 2rem;
+  text-align: center;
+
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+
+.cta-panel .section-sub {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+/* ==========================================================
+   17. RESPONSIVE DESIGN
+   These rules activate when the screen is 720px wide
+   or smaller, such as phones and small tablets.
+   ========================================================== */
+
+@media (max-width: 720px) {
+
+  /* Rank picture a bit smaller on phones. */
+  .rank-art {
+    width: 96px;
+    height: 96px;
+  }
+
+  .result-rank {
+    gap: 1rem;
+  }
+
+  /* Home page: stack the hero (text on top, preview below). */
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
+  }
+
+  .nav-links {
+    gap: 1rem;
+  }
+
+  .home-section {
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
+  }
+
+  /* Reduce spacing around the main app on smaller screens. */
+  .app {
+    padding: 2.5rem 1.5rem 3rem;
+  }
+
+  /* Make the code box smaller on mobile. */
+  .code-display {
+    padding: 1.25rem 1.25rem;
+    font-size: 0.95rem;
+  }
+
+  /* Stack the result content vertically. */
+  .result {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+
+/* ==========================================================
+   18. REDUCED MOTION / ACCESSIBILITY
+   Some users prefer less animation. This disables transitions
+   and animations when the operating system requests it.
+   ========================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+  *, *::before, *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
