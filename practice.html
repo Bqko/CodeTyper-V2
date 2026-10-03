@@ -15,11 +15,12 @@
   <!-- ==================== HEADER / NAVIGATION ==================== -->
   <header>
     <nav>
-      <a class="logo" href="index.html">CodeTyper V2</a>
+      <a class="logo" href="index.html">CodeType</a>
 
       <div class="nav-links">
         <a href="index.html">Home</a>
         <a href="practice.html" aria-current="page">Practice</a>
+        <a href="snippets.html">Snippets</a>
         <button id="theme-toggle" class="btn-secondary">Dark Mode</button>
       </div>
     </nav>
@@ -46,6 +47,7 @@
           <option value="easy">Easy</option>
           <option value="medium">Medium</option>
           <option value="hard">Hard</option>
+          <option value="master">Master</option>
       </select>
 
       <button id="new-snippet">Generate Snippet</button>
@@ -56,7 +58,18 @@
         Auto-indent
       </label>
 
+      <!-- When off, no emojis rise from the bottom after a run -->
+      <label class="toggle" for="emoji-toggle">
+        <input type="checkbox" id="emoji-toggle">
+        Emojis
+      </label>
+
       <div class="grow"></div>
+
+      <!-- Opens the list of achievements -->
+      <button id="achievements-open" class="btn-secondary">
+        🏆 Achievements <span id="achievements-count"></span>
+      </button>
     </div>
 
     <!-- Live typing statistics -->
@@ -118,6 +131,18 @@
         </div>
         <div id="chart-body"></div>
       </div>
+
+      <!-- Explanation of the code that was just typed -->
+      <div class="result-explain" id="result-explain" hidden>
+        <button id="explain-toggle" class="btn-secondary"
+                aria-expanded="false" aria-controls="explain-panel">
+          💡 Explain this code
+        </button>
+
+        <!-- Filled in by JavaScript (renderExplanation) -->
+        <div class="explain-panel" id="explain-panel" role="region"
+             aria-label="Explanation of the code" hidden></div>
+      </div>
     </div>
   </main>
 
@@ -126,11 +151,56 @@
     <p>&copy; 2026 CodeType. All rights reserved.</p>
   </footer>
 
+  <!-- Achievements list (opened with the Achievements button) -->
+  <dialog class="achievements-dialog" id="achievements-dialog"
+          aria-labelledby="achievements-title">
+    <div class="achievements-inner">
+      <div class="achievements-head">
+        <h2 id="achievements-title">Achievements</h2>
+        <button id="achievements-close" class="btn-secondary">Close</button>
+      </div>
+
+      <p class="achievements-summary" id="achievements-summary"></p>
+
+      <!-- The table is built by JavaScript (renderAchievements) -->
+      <div class="achievements-grid" id="achievements-grid"></div>
+
+      <div class="achievements-foot">
+        <button id="achievements-reset" class="btn-secondary">Reset achievements</button>
+      </div>
+    </div>
+  </dialog>
+
   <!-- Emojis rise from the bottom of the whole screen (added by JavaScript) -->
   <div class="emoji-layer" id="emoji-layer" aria-hidden="true"></div>
 
   <script src="theme.js"></script>
+  <script src="highlight.js"></script>
+  <script src="snippet-tools.js"></script>
   <script>
+    /* ==========================================================
+       REQUIRED FILES
+       This page needs highlight.js and snippet-tools.js. They must sit
+       in the same folder as practice.html. If one is missing, say so clearly
+       instead of showing an empty page.
+       ========================================================== */
+
+    const missingFiles = [];
+
+    if (typeof tokenize === 'undefined') missingFiles.push('highlight.js');
+    if (typeof fetchSnippetLibrary === 'undefined') missingFiles.push('snippet-tools.js');
+
+    if (missingFiles.length > 0) {
+      const message =
+        'Missing file: ' + missingFiles.join(' and ') + '. Put ' +
+        (missingFiles.length > 1 ? 'them' : 'it') +
+        ' in the same folder as practice.html and refresh the page.';
+
+      document.getElementById('code-display').textContent = message;
+      throw new Error(message);   // stops the rest of the script
+    }
+
+
     /* ==========================================================
        JAVASCRIPT APPLICATION
        This section controls the interactive behavior of CodeType.
@@ -149,201 +219,70 @@
 
        Format of snippets.json:
          language -> difficulty -> list of snippets
-       and every snippet is a list of LINES, for example:
+       and every snippet is an object: the code as a list of LINES,
+       plus the explanation shown by the "Explain this code" button:
 
          "python": {
            "easy": [
-             [
-               "def is_even(number):",
-               "    return number % 2 == 0"
-             ]
+             {
+               "title": "Check if a number is even",
+               "summary": "One sentence about what the code does.",
+               "points": ["First thing worth knowing.", "Second thing."],
+               "code": [
+                 "def is_even(number):",
+                 "    return number % 2 == 0"
+               ]
+             }
            ]
          }
 
+       In "summary" and "points", text between `backticks` is shown
+       as code. A snippet may also be just a list of lines, like
+       ["line 1", "line 2"]; it then has no explanation and the
+       button is not shown.
        Spaces at the start of a line are kept exactly as written,
        so indentation is whatever you type inside the quotes.
-       To add a snippet, copy one of the [ ... ] blocks.
+       To add a snippet, copy one of the { ... } blocks.
        ========================================================== */
 
     // Filled by loadSnippetLibrary() once snippets.json has loaded.
-    // Same shape as the JSON, but each snippet is one string (lines joined).
+    // Same shape as the JSON, but each snippet is { code, title, summary, points }
+    // with the code as one string (lines joined).
     const SNIPPETS = {};
     let snippetsLoaded = false;
 
+
+    /* Loads snippets.json into SNIPPETS.
+       fetchSnippetLibrary() is in snippet-tools.js (shared with snippets.html). */
     async function loadSnippetLibrary() {
-        const response = await fetch('snippets.json');
-
-        if (!response.ok) {
-            throw new Error('HTTP ' + response.status);
-        }
-
-        const data = await response.json();
-
-        for (const [language, levels] of Object.entries(data)) {
-            SNIPPETS[language] = {};
-
-            for (const [level, snippets] of Object.entries(levels)) {
-                SNIPPETS[language][level] = snippets.map(
-                    lines => lines.join('\n')
-                );
-            }
-        }
+        Object.assign(SNIPPETS, await fetchSnippetLibrary());
     }
+
+
+
 
     /* ==========================================================
        2B. SYNTAX HIGHLIGHTING
-       Works out a "token type" (keyword, string, number, ...) for
-       every character of a snippet. The type is stored on each
-       character's <span> as data-t="...", and style.css turns it
-       into a colour for characters that are still pending.
+       The tokenizer lives in highlight.js (shared with snippets.html).
+       tokenize(code, language) returns a token type for every
+       character; it is used when a snippet is loaded (see loadSnippet).
        ========================================================== */
-
-    const LANGUAGES = {
-
-        javascript: {
-            keywords: new Set([
-                'const', 'let', 'var', 'function', 'return', 'if', 'else',
-                'for', 'while', 'new', 'class', 'this', 'null', 'undefined',
-                'true', 'false', 'of', 'in', 'typeof', 'async', 'await',
-                'try', 'catch', 'finally', 'throw', 'extends', 'static',
-                'switch', 'case', 'break', 'continue', 'default', 'delete'
-            ]),
-            highlightClasses: true,
-            rules: [
-                ['com',  /\/\/.*|\/\*[\s\S]*?\*\//y],
-                ['str',  /"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'|`(?:\\.|[^`\\])*`/y],
-                // Regular expression such as /\s+/ (only right after "(").
-                ['str',  /(?<=\()\/(?:\\.|[^\/\\\n])+\/[a-z]*/y],
-                ['num',  /\d+(?:\.\d+)?/y],
-                ['word', /[A-Za-z_$][\w$]*/y]
-            ]
-        },
-
-        python: {
-            keywords: new Set([
-                'def', 'class', 'return', 'if', 'elif', 'else', 'for',
-                'while', 'in', 'not', 'and', 'or', 'is', 'import', 'from',
-                'as', 'pass', 'with', 'try', 'except', 'lambda', 'self',
-                'None', 'True', 'False', 'raise', 'finally', 'yield',
-                'break', 'continue', 'assert', 'global', 'del', 'async',
-                'await'
-            ]),
-            highlightClasses: true,
-            rules: [
-                ['com',  /#.*/y],
-                ['str',  /"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'/y],
-                ['num',  /\d+(?:\.\d+)?/y],
-                ['word', /[A-Za-z_]\w*/y]
-            ]
-        },
-
-        java: {
-            keywords: new Set([
-                'public', 'private', 'protected', 'static', 'final', 'void',
-                'class', 'int', 'double', 'boolean', 'new', 'return', 'if',
-                'else', 'for', 'while', 'import', 'this', 'null', 'true',
-                'false', 'try', 'catch', 'finally', 'throw', 'throws',
-                'extends', 'implements', 'interface', 'abstract', 'switch',
-                'case', 'break', 'continue', 'default', 'instanceof',
-                'super', 'long', 'float', 'char', 'byte', 'short', 'enum',
-                'package'
-            ]),
-            highlightClasses: true,
-            rules: [
-                ['com',  /\/\/.*|\/\*[\s\S]*?\*\//y],
-                ['str',  /"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'/y],
-                ['num',  /\d+(?:\.\d+)?/y],
-                ['word', /[A-Za-z_$][\w$]*/y]
-            ]
-        },
-
-        sql: {
-            // SQL is not case-sensitive, so keywords are compared in UPPERCASE.
-            ignoreCase: true,
-            keywords: new Set([
-                'SELECT', 'FROM', 'WHERE', 'INSERT', 'INTO', 'VALUES',
-                'UPDATE', 'SET', 'JOIN', 'INNER', 'LEFT', 'RIGHT', 'ON',
-                'GROUP', 'BY', 'ORDER', 'HAVING', 'AS', 'DESC', 'ASC',
-                'AND', 'OR', 'NOT', 'NULL', 'WITH', 'CASE', 'WHEN', 'THEN',
-                'ELSE', 'END', 'LIMIT', 'OFFSET', 'DISTINCT', 'LIKE', 'IN',
-                'IS', 'BETWEEN', 'EXISTS', 'UNION', 'CREATE', 'TABLE',
-                'DELETE', 'FULL', 'OUTER', 'CROSS'
-            ]),
-            highlightClasses: false,
-            rules: [
-                ['com',  /--.*/y],
-                ['str',  /'(?:''|[^'])*'/y],
-                ['num',  /\d+(?:\.\d+)?/y],
-                ['word', /[A-Za-z_]\w*/y]
-            ]
-        }
-    };
-
-
-    /* Decide what kind of word this is: keyword, function call,
-       class/type name, or plain text (null). */
-    function classifyWord(word, code, end, spec) {
-        const key = spec.ignoreCase ? word.toUpperCase() : word;
-
-        if (spec.keywords.has(key)) return 'kw';
-        if (code[end] === '(') return 'fn';
-        if (spec.highlightClasses && /^[A-Z]/.test(word)) return 'cls';
-
-        return null;
-    }
-
-
-    /* Returns an array with one token type (or null) per character. */
-    function tokenize(code, lang) {
-        const types = new Array(code.length).fill(null);
-        const spec = LANGUAGES[lang];
-
-        if (!spec) return types;
-
-        let i = 0;
-
-        while (i < code.length) {
-            let matched = false;
-
-            for (const [type, re] of spec.rules) {
-                re.lastIndex = i;
-                const m = re.exec(code);
-
-                if (m && m[0].length > 0) {
-                    const end = i + m[0].length;
-                    const t = type === 'word'
-                        ? classifyWord(m[0], code, end, spec)
-                        : type;
-
-                    if (t) types.fill(t, i, end);
-
-                    i = end;
-                    matched = true;
-                    break;
-                }
-            }
-
-            // Spaces, punctuation and operators stay uncoloured.
-            if (!matched) i++;
-        }
-
-        return types;
-    }
 
 
     /* Pick a random snippet based on language and difficulty.
-       Returns { code, language } so we know how to colour it. */
+       Returns { code, language, title, summary, points }: the language
+       is needed for the colours, the rest for the explanation. */
     function randomSnippet(lang, difficulty) {
         let pool = [];
 
         if (lang === 'all') {
             pool = Object.entries(SNIPPETS).flatMap(([name, level]) =>
-                (level[difficulty] || []).map(code => ({ code, language: name }))
+                (level[difficulty] || []).map(snippet => ({ ...snippet, language: name }))
             );
         } else {
             const list = (SNIPPETS[lang] && SNIPPETS[lang][difficulty]) || [];
 
-            pool = list.map(code => ({ code, language: lang }));
+            pool = list.map(snippet => ({ ...snippet, language: lang }));
         }
 
         // null means "nothing found for this choice".
@@ -365,6 +304,7 @@
     const difficultySelect = $('difficulty');
 
     let target = '';
+    let currentSnippet = null;   // the snippet being typed (with its explanation)
     let spans = [];
     let position = 0;
 
@@ -417,6 +357,14 @@
     */
     const autoIndentBox = $('auto-indent');
     autoIndentBox.checked = localStorage.getItem('autoIndent') !== 'off';
+
+
+    /*
+    * Emojis setting (checkbox in the controls).
+    * Turns the rising emojis on/off. Saved in localStorage; on by default.
+    */
+    const emojiBox = $('emoji-toggle');
+    emojiBox.checked = localStorage.getItem('emojis') !== 'off';
 
 
     /* ==========================================================
@@ -475,6 +423,7 @@
 
       // Nothing in snippets.json for this language + difficulty.
       if (!pick) {
+        currentSnippet = null;
         finished = true;
         display.textContent =
           'No snippets found for this language and difficulty. ' +
@@ -487,6 +436,10 @@
       finished = false;
 
       target = pick.code;
+
+      // Keep the explanation for the results screen, and hide the old one.
+      currentSnippet = { ...pick, difficulty: difficultySelect.value };
+      resetExplanation();
 
       // One token type per character (keyword, string, number, ...).
       const tokenTypes = tokenize(target, pick.language);
@@ -620,7 +573,10 @@
       countUp($('r-errors'), String(errorCount),         300);
 
       // Pick the rank from the WPM that is shown, and prepare its reveal.
-      showRank(parseInt($('stat-wpm').textContent, 10) || 0);
+      showRank(parseInt($('stat-wpm').textContent, 10) || 0, difficultySelect.value);
+
+      // The "Explain this code" button, if this snippet has an explanation.
+      explainBox.hidden = !(currentSnippet && currentSnippet.summary);
 
       $('result').classList.add('show');
 
@@ -706,7 +662,7 @@
 
        "min" is the lowest WPM for that rank (inclusive), so:
          0-9 grandma, 10-19 slow, 20-39 average,
-         40-59 good, 60-79 very good, 80+ godlike.
+         40-59 good, 60-79 very good, 80+ master.
 
        To use your own pictures, change the "image" paths
        (any PNG, JPG or SVG works).
@@ -715,6 +671,17 @@
          emojis     = list of emojis that rise from the bottom of the
                       whole screen (see spawnEmojis below)
          emojiCount = how many pop up (default 24)
+         emojiRise  = [lowest, highest] height they reach, as a % of the
+                      screen height (default [30, 60])
+         bottomConfetti = how many confetti pieces shoot up from the
+                      bottom of the whole screen (uses "colors")
+         cannons    = confetti pieces fired from EACH bottom corner,
+                      diagonally across the screen (uses "colors")
+         glow       = true adds a golden glow around the screen edges when
+                      the achievement banner appears
+
+       Achievements need no setting here: every rank has one for each
+       difficulty (see section 8A3).
        ========================================================== */
 
     const RANK_REVEAL = 0.9;   // seconds after finishing until the rank appears
@@ -734,14 +701,20 @@
         title: 'Slower than average',
         line: 'Warming up. Every run makes your fingers a little faster.',
         image: 'images/rank-slow.svg',
-        confetti: 0
+        confetti: 0,
+        emojis: ['🐢', '🐌', '😅', '⏳', '💤'],
+        emojiCount: 24
       },
       {
         id: 'average', min: 20,
         title: 'Average',
         line: 'Right in the middle of the pack. Keep going and you will climb.',
         image: 'images/rank-average.svg',
-        confetti: 0
+        confetti: 0,
+        emojis: ['🙂', '👍', '😎', '👌', '✨'],
+        emojiCount: 22,
+        bottomConfetti: 50,
+        colors: ['#6FBF8B', '#F7C948', '#4C9BE8', '#E5533D', '#C39BE0']
       },
       {
         id: 'good', min: 40,
@@ -749,7 +722,9 @@
         line: 'Solid speed. Your fingers know where the symbols are.',
         image: 'images/rank-good.svg',
         confetti: 14,
-        colors: ['#6FBF8B', '#F7C948', '#4C9BE8']
+        colors: ['#6FBF8B', '#F7C948', '#4C9BE8'],
+        emojis: ['👏', '💪', '😄', '🙌', '💯'],
+        emojiCount: 30
       },
       {
         id: 'great', min: 60,
@@ -757,15 +732,23 @@
         line: 'Fast and clean. You are flying through this code!',
         image: 'images/rank-great.svg',
         confetti: 36,
-        colors: ['#4C9BE8', '#6FBF8B', '#F7C948', '#E5533D', '#C39BE0']
+        colors: ['#4C9BE8', '#6FBF8B', '#F7C948', '#E5533D', '#C39BE0'],
+        emojis: ['🚀', '⚡', '💥', '🤩', '🌠'],
+        emojiCount: 32
       },
       {
-        id: 'godlike', min: 80,
-        title: 'Godlike',
+        id: 'master', min: 80,
+        title: 'Master',
         line: 'Are you even human? Absolutely unreal speed.',
-        image: 'images/rank-godlike.svg',
+        image: 'images/rank-master.svg',
         confetti: 70,
-        colors: ['#FFD54A', '#F7C948', '#FFF3C4', '#E0A82E', '#FFFFFF']
+        colors: ['#FFD54A', '#F7C948', '#FFF3C4', '#E0A82E', '#FFFFFF',
+                 '#E5533D', '#4C9BE8'],
+        emojis: ['🏆', '👑', '✨', '🎉', '🔥', '⭐'],
+        emojiCount: 34,
+        emojiRise: [45, 90],
+        cannons: 45,
+        glow: true
       }
     ];
 
@@ -777,7 +760,7 @@
 
 
     /* Fill in the rank block for this WPM and start its animations. */
-    function showRank(wpm) {
+    function showRank(wpm, difficulty = difficultySelect.value) {
       // Highest rank whose minimum WPM has been reached.
       const rank = [...RANKS].reverse().find(r => wpm >= r.min);
 
@@ -792,8 +775,17 @@
       $('rank-title').textContent = rank.title;
       $('rank-line').textContent = rank.line;
 
+      // Each rank + difficulty is its own achievement, unlocked the first time.
+      const isNewAchievement = unlockAchievement(rank.id, difficulty);
+
+      // Clear leftovers from a previous run, then add this rank's effects.
+      $('emoji-layer').innerHTML = '';
+
       spawnConfetti(rank);
       spawnEmojis(rank);
+      spawnBottomConfetti(rank);
+      spawnCannons(rank);
+      spawnAchievement(rank, difficulty, isNewAchievement);   // last: drawn on top
     }
 
 
@@ -838,11 +830,13 @@
     function spawnEmojis(rank) {
       const layer = $('emoji-layer');
 
-      layer.innerHTML = '';
-
-      if (!rank.emojis || prefersReducedMotion()) return;
+      if (!rank.emojis || !emojiBox.checked || prefersReducedMotion()) return;
 
       const count = rank.emojiCount || 24;
+
+      // Rise range in vh (% of the screen height): [lowest, highest].
+      // Default is about the lower half of the screen; Master overrides it.
+      const [riseMin, riseMax] = rank.emojiRise || [30, 60];
 
       for (let i = 0; i < count; i++) {
         const piece = document.createElement('span');
@@ -855,8 +849,12 @@
 
         piece.style.fontSize = (28 + Math.random() * 36) + 'px';
 
-        // How high it rises, how far it drifts sideways, how much it tilts.
-        piece.style.setProperty('--rise', (45 + Math.random() * 45) + 'vh');
+        // How high it rises (a % of the screen height), how far it drifts
+        // sideways, how much it tilts.
+        piece.style.setProperty(
+          '--rise',
+          (riseMin + Math.random() * (riseMax - riseMin)) + 'vh'
+        );
         piece.style.setProperty('--drift', (Math.random() * 80 - 40) + 'px');
         piece.style.setProperty('--tilt', (Math.random() * 50 - 25) + 'deg');
 
@@ -870,6 +868,436 @@
         layer.appendChild(piece);
       }
     }
+
+
+    /* Confetti that shoots up from the bottom of the whole screen
+       (like the emojis, but small coloured pieces). The movement is
+       the CSS animation "confetti-launch" in style.css. */
+    function spawnBottomConfetti(rank) {
+      const layer = $('emoji-layer');
+
+      if (!rank.bottomConfetti || prefersReducedMotion()) return;
+
+      for (let i = 0; i < rank.bottomConfetti; i++) {
+        const piece = document.createElement('i');
+
+        // Spread evenly across the full width, with some randomness.
+        piece.style.left =
+          (((i + Math.random()) / rank.bottomConfetti) * 100) + 'vw';
+
+        piece.style.width = (6 + Math.random() * 5) + 'px';
+        piece.style.height = (10 + Math.random() * 6) + 'px';
+        piece.style.background = rank.colors[i % rank.colors.length];
+
+        // How high it shoots, how far it drifts, how much it spins.
+        piece.style.setProperty('--rise', (35 + Math.random() * 45) + 'vh');
+        piece.style.setProperty('--drift', (Math.random() * 240 - 120) + 'px');
+        piece.style.setProperty('--tilt', (Math.random() * 720 - 360) + 'deg');
+
+        piece.style.animationDuration = (2.4 + Math.random() * 1.2) + 's';
+        piece.style.animationDelay =
+          (RANK_REVEAL + Math.random() * 0.9) + 's';
+
+        piece.addEventListener('animationend', () => piece.remove());
+
+        layer.appendChild(piece);
+      }
+    }
+
+
+    /* Confetti cannons: pieces fired from BOTH bottom corners of the
+       screen, diagonally across it. Two volleys, about a second apart.
+       The movement is the CSS animation "confetti" (style.css). */
+    function spawnCannons(rank) {
+      const layer = $('emoji-layer');
+
+      if (!rank.cannons || prefersReducedMotion()) return;
+
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+
+      ['left', 'right'].forEach((side) => {
+        // Left cannon fires to the right (+), right cannon to the left (-).
+        const direction = side === 'left' ? 1 : -1;
+
+        for (let i = 0; i < rank.cannons; i++) {
+          const piece = document.createElement('i');
+
+          piece.className = 'cannon';
+          piece.style[side] = '0px';
+
+          // Highest point of the flight, then where it lands.
+          const peakX = direction * (0.15 + Math.random() * 0.35) * W;
+          const peakY = -(0.45 + Math.random() * 0.5) * H;
+          const endX = peakX + direction * (0.05 + Math.random() * 0.2) * W;
+          const endY = Math.random() * 0.15 * H;
+
+          piece.style.setProperty('--px', peakX + 'px');
+          piece.style.setProperty('--py', peakY + 'px');
+          piece.style.setProperty('--dx', endX + 'px');
+          piece.style.setProperty('--dy', endY + 'px');
+          piece.style.setProperty('--rot', (Math.random() * 900 - 450) + 'deg');
+
+          piece.style.background = rank.colors[i % rank.colors.length];
+          piece.style.width = (6 + Math.random() * 5) + 'px';
+          piece.style.height = (10 + Math.random() * 6) + 'px';
+
+          // Every second piece belongs to the second volley.
+          const volleyDelay = i % 2 === 0 ? 0 : 1.1;
+
+          piece.style.animationDuration = (2 + Math.random() * 0.8) + 's';
+          piece.style.animationDelay =
+            (RANK_REVEAL + volleyDelay + Math.random() * 0.3) + 's';
+
+          piece.addEventListener('animationend', () => piece.remove());
+
+          layer.appendChild(piece);
+        }
+      });
+    }
+
+
+    /* "Achievement unlocked" banner (like in video games). It only
+       appears the FIRST time a rank is reached on a difficulty. */
+    function spawnAchievement(rank, difficulty, isNew) {
+      const layer = $('emoji-layer');
+
+      if (!isNew || prefersReducedMotion()) return;
+
+      // Some ranks (Master) also get a golden glow around the screen edges.
+      if (rank.glow) {
+        const glow = document.createElement('div');
+
+        glow.className = 'achievement-glow';
+        glow.style.setProperty('--delay', RANK_REVEAL + 's');
+        glow.addEventListener('animationend', () => glow.remove());
+        layer.appendChild(glow);
+      }
+
+      // The banner slides down a little after the rank appears.
+      const rankIndex = RANKS.indexOf(rank);
+      const toast = document.createElement('div');
+
+      toast.className = 'achievement';
+      toast.dataset.tier = rank.id;   // CSS gives each rank its own colour
+      toast.style.setProperty('--delay', (RANK_REVEAL + 0.7) + 's');
+
+      toast.innerHTML =
+        '<img class="achievement-img" alt="" width="46" height="46">' +
+        '<div class="achievement-body">' +
+          '<div class="achievement-label">Achievement unlocked</div>' +
+          '<div class="achievement-title"></div>' +
+          '<div class="achievement-desc"></div>' +
+        '</div>';
+
+      toast.querySelector('.achievement-img').src = rank.image;
+      toast.querySelector('.achievement-title').textContent = rank.title;
+      toast.querySelector('.achievement-desc').textContent =
+        'Typed ' + rankRange(rankIndex) + ' on ' + difficultyLabel(difficulty);
+
+      // The shine on the banner is also an animation, so check which one ended.
+      toast.addEventListener('animationend', (event) => {
+        if (event.animationName === 'achievement-toast') toast.remove();
+      });
+
+      layer.appendChild(toast);
+    }
+
+
+    /* ==========================================================
+       8A3. ACHIEVEMENTS
+       Every rank can be earned on every difficulty, and each
+       combination is its own achievement (6 ranks x 4 difficulties
+       = 24). An achievement unlocks the first time you reach that
+       rank on that difficulty.
+
+       Saved in localStorage as { "average:medium": "2026-10-03", ... }
+       ========================================================== */
+
+
+    const ACHIEVEMENTS_KEY = 'achievements';
+    const TOTAL_ACHIEVEMENTS = RANKS.length * DIFFICULTIES.length;
+
+
+    /* Read / write the saved achievements (safe if storage is blocked). */
+    function loadAchievements() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(ACHIEVEMENTS_KEY));
+
+        return saved && typeof saved === 'object' ? saved : {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function saveAchievements(map) {
+      try {
+        localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(map));
+      } catch (error) {
+        // Storage not available: achievements just won't be remembered.
+      }
+    }
+
+
+
+
+    /* The WPM range of a rank as text, e.g. "20-39 WPM". */
+    function rankRange(index) {
+      const rank = RANKS[index];
+      const next = RANKS[index + 1];
+
+      if (!next) return rank.min + '+ WPM';
+      if (index === 0) return 'under ' + next.min + ' WPM';
+
+      return rank.min + '\u2013' + (next.min - 1) + ' WPM';
+    }
+
+
+    function countUnlocked() {
+      const saved = loadAchievements();
+      let count = 0;
+
+      RANKS.forEach((rank) => {
+        DIFFICULTIES.forEach((difficulty) => {
+          if (saved[rank.id + ':' + difficulty.id]) count++;
+        });
+      });
+
+      return count;
+    }
+
+
+    /* Updates the "3/18" on the Achievements button. */
+    function updateAchievementCount() {
+      $('achievements-count').textContent =
+        countUnlocked() + '/' + TOTAL_ACHIEVEMENTS;
+    }
+
+
+    /* Unlocks one achievement. Returns true only the FIRST time. */
+    function unlockAchievement(rankId, difficulty) {
+      const key = rankId + ':' + difficulty;
+      const saved = loadAchievements();
+
+      if (saved[key]) return false;
+
+      saved[key] = new Date().toISOString().slice(0, 10);   // e.g. 2026-10-03
+      saveAchievements(saved);
+      updateAchievementCount();
+
+      return true;
+    }
+
+
+    /* Builds the achievements table: one row per rank, one column per
+       difficulty, with a trophy (unlocked) or a lock (locked). */
+    function renderAchievements() {
+      const saved = loadAchievements();
+      const grid = $('achievements-grid');
+
+      grid.innerHTML = '';
+      grid.style.setProperty('--difficulty-count', DIFFICULTIES.length);
+
+      // Header row: an empty corner, then one column per difficulty.
+      grid.appendChild(document.createElement('div'));
+
+      DIFFICULTIES.forEach((difficulty) => {
+        const head = document.createElement('div');
+
+        head.className = 'ach-head';
+        head.textContent = difficulty.label;
+        grid.appendChild(head);
+      });
+
+      RANKS.forEach((rank, index) => {
+        // Rank name cell: picture, title and WPM range.
+        const rankCell = document.createElement('div');
+        const img = document.createElement('img');
+        const text = document.createElement('div');
+        const title = document.createElement('div');
+        const range = document.createElement('div');
+
+        rankCell.className = 'ach-rank';
+        img.src = rank.image;
+        img.alt = '';
+        img.width = 36;
+        img.height = 36;
+        title.className = 'ach-rank-title';
+        title.textContent = rank.title;
+        range.className = 'ach-rank-range';
+        range.textContent = rankRange(index);
+
+        text.append(title, range);
+        rankCell.append(img, text);
+        grid.appendChild(rankCell);
+
+        // One cell per difficulty.
+        DIFFICULTIES.forEach((difficulty) => {
+          const date = saved[rank.id + ':' + difficulty.id];
+          const cell = document.createElement('div');
+
+          cell.className = 'ach-cell ' + (date ? 'unlocked' : 'locked');
+          cell.textContent = date ? '🏆' : '🔒';
+          cell.title = date
+            ? 'Unlocked on ' + date
+            : 'Locked: type ' + rankRange(index) + ' on ' + difficulty.label;
+
+          grid.appendChild(cell);
+        });
+      });
+
+      // "Easy, Medium, Hard and Master"
+      const names = DIFFICULTIES.map(d => d.label);
+      const nameList = names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1];
+
+      $('achievements-summary').textContent =
+        countUnlocked() + ' of ' + TOTAL_ACHIEVEMENTS + ' unlocked. ' +
+        'Every rank counts separately on ' + nameList + '.';
+    }
+
+
+    /* Open / close the achievements window. */
+    const achievementsDialog = $('achievements-dialog');
+
+    function closeAchievements() {
+      if (typeof achievementsDialog.close === 'function') {
+        achievementsDialog.close();
+      } else {
+        achievementsDialog.removeAttribute('open');
+      }
+    }
+
+    $('achievements-open').addEventListener('click', () => {
+      renderAchievements();
+
+      if (typeof achievementsDialog.showModal === 'function') {
+        achievementsDialog.showModal();
+      } else {
+        achievementsDialog.setAttribute('open', '');
+      }
+    });
+
+    $('achievements-close').addEventListener('click', closeAchievements);
+
+    // Clicking the dark area outside the window also closes it.
+    achievementsDialog.addEventListener('click', (event) => {
+      if (event.target === achievementsDialog) closeAchievements();
+    });
+
+    $('achievements-reset').addEventListener('click', () => {
+      if (window.confirm('Reset all achievements? This cannot be undone.')) {
+        saveAchievements({});
+        updateAchievementCount();
+        renderAchievements();
+      }
+    });
+
+    updateAchievementCount();
+
+
+    /* ==========================================================
+       8D. CODE EXPLANATION
+       The "Explain this code" button under the results. It shows the
+       title, summary and key points of the snippet that was just
+       typed (they come from snippets.json).
+       ========================================================== */
+
+
+    const EXPLAIN_LABEL_CLOSED = '💡 Explain this code';
+    const EXPLAIN_LABEL_OPEN = 'Hide explanation';
+
+    const explainBox = $('result-explain');
+    const explainButton = $('explain-toggle');
+    const explainPanel = $('explain-panel');
+
+
+
+
+
+
+    /* Builds the explanation panel for the snippet that was just typed. */
+    function renderExplanation() {
+      const snippet = currentSnippet;
+
+      explainPanel.innerHTML = '';
+
+      if (!snippet || !snippet.summary) return;
+
+      // Title on the left, "Python · Medium" on the right.
+      const head = makeElement('div', 'explain-head');
+      const title = document.createElement('h3');
+
+      title.textContent = snippet.title || 'About this code';
+      head.append(
+        title,
+        makeElement(
+          'span',
+          'explain-meta',
+          (LANGUAGE_NAMES[snippet.language] || snippet.language) +
+            ' · ' + difficultyLabel(snippet.difficulty)
+        )
+      );
+
+      // What it does.
+      const summary = makeElement('p', 'explain-summary');
+
+      addFormattedText(summary, snippet.summary);
+
+      explainPanel.append(
+        head,
+        makeElement('div', 'explain-kicker', 'What it does'),
+        summary
+      );
+
+      // How it works (a bullet list).
+      if (snippet.points && snippet.points.length > 0) {
+        const list = makeElement('ul', 'explain-points');
+
+        snippet.points.forEach((point) => {
+          const item = document.createElement('li');
+
+          addFormattedText(item, point);
+          list.appendChild(item);
+        });
+
+        explainPanel.append(
+          makeElement('div', 'explain-kicker', 'How it works'),
+          list
+        );
+      }
+    }
+
+
+    /* Hides the button and panel (used whenever a new snippet loads). */
+    function resetExplanation() {
+      explainBox.hidden = true;
+      explainPanel.hidden = true;
+      explainPanel.innerHTML = '';
+      explainButton.setAttribute('aria-expanded', 'false');
+      explainButton.textContent = EXPLAIN_LABEL_CLOSED;
+    }
+
+
+    /* Open / close the explanation. */
+    explainButton.addEventListener('click', () => {
+      const opening = explainPanel.hidden;
+
+      if (opening) renderExplanation();
+
+      explainPanel.hidden = !opening;
+      explainButton.setAttribute('aria-expanded', String(opening));
+      explainButton.textContent = opening
+        ? EXPLAIN_LABEL_OPEN
+        : EXPLAIN_LABEL_CLOSED;
+
+      // Make sure the new panel is visible on screen.
+      if (opening && explainPanel.scrollIntoView) {
+        explainPanel.scrollIntoView({
+          behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+          block: 'nearest'
+        });
+      }
+    });
 
 
     /* ==========================================================
@@ -1307,6 +1735,18 @@
       );
 
       loadSnippet();
+    });
+
+    emojiBox.addEventListener('change', () => {
+      localStorage.setItem('emojis', emojiBox.checked ? 'on' : 'off');
+
+      // Turning emojis off also removes the ones floating on screen right
+      // now. (Only the emojis: confetti and banners are not touched.)
+      if (!emojiBox.checked) {
+        $('emoji-layer')
+          .querySelectorAll(':scope > span')
+          .forEach(emoji => emoji.remove());
+      }
     });
 
 

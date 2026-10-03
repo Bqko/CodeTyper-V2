@@ -820,7 +820,7 @@ nav {
    15C. RANK REVEAL
    The game-style rank at the top of the results panel.
    JavaScript sets data-tier on #result (grandma, slow, average,
-   good, great or godlike) and the --reveal delay on #result-rank,
+   good, great or master) and the --reveal delay on #result-rank,
    and CSS does the rest. Reduced motion turns all of it off.
    ========================================================== */
 
@@ -894,7 +894,7 @@ nav {
 [data-tier="average"] .rank-title { color: var(--ink); }
 [data-tier="good"]    .rank-title { color: var(--stamp); }
 [data-tier="great"]   .rank-title { color: var(--tok-cls); }
-[data-tier="godlike"] .rank-title { color: var(--gold); }
+[data-tier="master"] .rank-title { color: var(--gold); }
 
 
 /* ---------- Text appears after the picture ---------- */
@@ -969,8 +969,8 @@ nav {
 }
 
 
-/* Godlike: slams down from big and shakes the whole rank block. */
-[data-tier="godlike"] .rank-art {
+/* Master: slams down from big and shakes the whole rank block. */
+[data-tier="master"] .rank-art {
   animation: rank-slam 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) var(--reveal, 0.9s) backwards;
 }
 
@@ -991,7 +991,7 @@ nav {
 }
 
 
-[data-tier="godlike"] .result-rank {
+[data-tier="master"] .result-rank {
   animation: rank-shake 0.5s ease-in-out calc(var(--reveal, 0.9s) + 0.2s);
 }
 
@@ -1040,9 +1040,9 @@ nav {
 }
 
 
-/* Very good and godlike: float up and down, with a glow. */
+/* Very good and master: float up and down, with a glow. */
 [data-tier="great"] .rank-img,
-[data-tier="godlike"] .rank-img {
+[data-tier="master"] .rank-img {
   animation: rank-float 2.6s ease-in-out calc(var(--reveal, 0.9s) + 0.6s) infinite;
 }
 
@@ -1055,15 +1055,15 @@ nav {
   filter: drop-shadow(0 6px 14px color-mix(in srgb, var(--tok-cls) 55%, transparent));
 }
 
-[data-tier="godlike"] .rank-img {
+[data-tier="master"] .rank-img {
   filter: drop-shadow(0 0 16px color-mix(in srgb, var(--gold) 75%, transparent));
 }
 
 
-/* ---------- Godlike extras ---------- */
+/* ---------- Master extras ---------- */
 
 /* Golden rays that slowly spin behind the picture. */
-[data-tier="godlike"] .rank-art::before {
+[data-tier="master"] .rank-art::before {
   content: "";
   position: absolute;
   inset: -60px;
@@ -1095,7 +1095,7 @@ nav {
 
 
 /* The title glows. */
-[data-tier="godlike"] .rank-title {
+[data-tier="master"] .rank-title {
   text-transform: uppercase;
   letter-spacing: 0.12em;
 
@@ -1176,7 +1176,7 @@ nav {
 }
 
 
-.emoji-layer span {
+.emoji-layer > span {
   position: absolute;
 
   /* Starts just below the bottom edge of the screen. */
@@ -1218,6 +1218,819 @@ nav {
       scale(1)
       rotate(var(--tilt));
   }
+}
+
+
+/* Confetti pieces shot up from the bottom of the screen
+   (the <i> elements; the <span> ones above are emojis). */
+.emoji-layer > i {
+  position: absolute;
+  bottom: -20px;
+
+  border-radius: 2px;
+
+  /* Invisible until its animation starts (JavaScript sets the delay). */
+  opacity: 0;
+  animation: confetti-launch 3s ease-out forwards;
+}
+
+
+/* Shoots up fast, then slows down, flutters and falls back while fading.
+   --rise, --drift and --tilt are set per piece by JavaScript. */
+@keyframes confetti-launch {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  50% {
+    opacity: 1;
+    transform:
+      translate(calc(var(--drift) * 0.6), calc(var(--rise) * -1))
+      rotate(calc(var(--tilt) * 0.5));
+    animation-timing-function: ease-in;
+  }
+
+  100% {
+    opacity: 0;
+    transform:
+      translate(var(--drift), calc(var(--rise) * -0.25))
+      rotate(var(--tilt));
+  }
+}
+
+
+/* ---------- Confetti cannons (Master) ----------
+   Pieces fired from the bottom corners. They reuse the "confetti"
+   animation (up and out, then falling) from the rank picture. */
+.emoji-layer > i.cannon {
+  animation: confetti 2.4s ease-out forwards;
+}
+
+
+/* ---------- "Achievement unlocked" (Master) ---------- */
+
+/* Golden glow around the edges of the screen, fading in and out. */
+.achievement-glow {
+  position: absolute;
+  inset: 0;
+
+  box-shadow: inset 0 0 140px 20px color-mix(in srgb, var(--gold) 55%, transparent);
+
+  opacity: 0;
+  animation: achievement-glow 2.2s ease-out var(--delay, 0.9s) both;
+}
+
+
+@keyframes achievement-glow {
+  0%   { opacity: 0; }
+  15%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+
+/* The banner: slides down from the top, stays for a few seconds,
+   then slides away. */
+.achievement {
+  --accent: var(--gold);
+
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+
+  min-width: 280px;
+  max-width: calc(100vw - 2rem);
+  padding: 0.75rem 1.75rem 0.75rem 0.75rem;
+
+  border: 1px solid color-mix(in srgb, var(--accent) 65%, var(--rule));
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.35),
+    0 0 26px color-mix(in srgb, var(--accent) 40%, transparent);
+
+  /* Keeps the shine inside the rounded shape. */
+  overflow: hidden;
+
+  opacity: 0;
+  animation: achievement-toast 5.4s cubic-bezier(0.2, 0.9, 0.2, 1) var(--delay, 1.6s) both;
+}
+
+
+@keyframes achievement-toast {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -160%) scale(0.9);
+  }
+
+  8% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1.05);
+  }
+
+  11% {
+    transform: translate(-50%, 0) scale(1);
+  }
+
+  88% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -160%) scale(0.95);
+  }
+}
+
+
+/* A light streak that sweeps across the banner once. */
+.achievement::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background: linear-gradient(
+    110deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 65%
+  );
+
+  transform: translateX(-120%);
+  animation: achievement-shine 1.2s ease-out calc(var(--delay, 1.6s) + 0.8s) both;
+}
+
+
+@keyframes achievement-shine {
+  from { transform: translateX(-120%); }
+  to   { transform: translateX(120%); }
+}
+
+
+/* The rank picture on the left of the banner. */
+.achievement-img {
+  flex: none;
+  width: 46px;
+  height: 46px;
+}
+
+
+.achievement-label {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+
+.achievement-title {
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+
+.achievement-desc {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+
+/* Banner colour for each rank (matches the rank title colours). */
+.achievement[data-tier="grandma"] { --accent: var(--ink-soft); }
+.achievement[data-tier="slow"]    { --accent: var(--clay); }
+.achievement[data-tier="average"] { --accent: var(--tok-num); }
+.achievement[data-tier="good"]    { --accent: var(--stamp); }
+.achievement[data-tier="great"]   { --accent: var(--tok-cls); }
+.achievement[data-tier="master"]  { --accent: var(--gold); }
+
+
+/* ==========================================================
+   15E. ACHIEVEMENTS WINDOW
+   The list opened by the Achievements button (a <dialog>).
+   ========================================================== */
+
+.achievements-dialog {
+  width: min(720px, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  padding: 0;
+
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+
+/* The dark area behind the window. */
+.achievements-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+
+/* The padding lives here (not on the dialog), so a click on the dark
+   area outside can be told apart from a click inside the window. */
+.achievements-inner {
+  padding: 1.5rem;
+}
+
+
+.achievements-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+
+.achievements-head h2 {
+  font-size: 1.5rem;
+}
+
+
+.achievements-summary {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+
+/* Rank column + one column per difficulty (set by JavaScript). */
+.achievements-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2.2fr) repeat(var(--difficulty-count, 4), minmax(0, 1fr));
+  align-items: center;
+  gap: 0.75rem;
+
+  margin: 1.25rem 0;
+}
+
+
+.ach-head {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+
+.ach-rank {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+
+.ach-rank img {
+  flex: none;
+}
+
+
+.ach-rank-title {
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+
+.ach-rank-range {
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+
+.ach-cell {
+  text-align: center;
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+
+/* Locked achievements are faded and grey. */
+.ach-cell.locked {
+  opacity: 0.3;
+  filter: grayscale(1);
+}
+
+
+.achievements-foot {
+  display: flex;
+  justify-content: flex-end;
+}
+
+
+/* ==========================================================
+   15F. CODE EXPLANATION
+   The "Explain this code" button and panel under the results.
+   JavaScript fills the panel (renderExplanation in practice.html).
+   ========================================================== */
+
+.result-explain {
+  width: 100%;
+  flex: none;
+
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+  text-align: left;
+}
+
+
+.explain-panel {
+  margin-top: 1rem;
+  padding: 1.25rem 1.5rem;
+
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--rule) 22%, var(--surface));
+
+  /* Slides in a little each time it opens. */
+  animation: explain-in 0.35s ease-out;
+}
+
+
+@keyframes explain-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+
+/* Title on the left, language and difficulty on the right. */
+.explain-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+
+  margin-bottom: 1rem;
+}
+
+
+.explain-head h3 {
+  font-size: 1.3rem;
+}
+
+
+.explain-meta {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+
+/* Small headings: "What it does" and "How it works". */
+.explain-kicker {
+  margin: 1rem 0 0.4rem;
+
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--stamp);
+}
+
+
+.explain-head + .explain-kicker {
+  margin-top: 0;
+}
+
+
+.explain-summary {
+  margin: 0;
+}
+
+
+.explain-points {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+
+.explain-points li {
+  margin-bottom: 0.45rem;
+}
+
+
+/* Pieces of code inside the text, written between `backticks`. */
+.explain-panel code {
+  padding: 0.1em 0.35em;
+
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--rule) 60%, transparent);
+
+  font-family: var(--mono);
+  font-size: 0.88em;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+
+/* ==========================================================
+   15G. SNIPPETS PAGE (snippets.html)
+   Intro, filter buttons, the lists on the left, and the code +
+   explanation of the selected snippet on the right.
+   ========================================================== */
+
+/* ---------- Page width ----------
+   This page is wider than the others (they stop at 1080px).
+   The header is widened too, so the logo lines up with the content. */
+
+.page-wide nav,
+.page-wide section {
+  max-width: 1400px;
+}
+
+
+/* ---------- Intro ---------- */
+
+.library-intro {
+  padding-top: 3rem;
+  padding-bottom: 1.5rem;
+}
+
+
+.library-intro h1 {
+  font-size: clamp(2rem, 4.5vw, 2.8rem);
+  line-height: 1.1;
+}
+
+
+.library-intro p {
+  max-width: 56ch;
+  margin: 0.75rem 0 0;
+  color: var(--ink-soft);
+}
+
+
+/* ---------- Two columns: lists | selected snippet ---------- */
+
+.library {
+  display: grid;
+  grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+  gap: 2rem;
+  align-items: start;
+
+  padding-bottom: 4rem;
+}
+
+
+/* The left column stays in view and scrolls on its own. */
+.library-side {
+  position: sticky;
+  top: 1rem;
+
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+
+/* ---------- Filter buttons ---------- */
+
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+
+.filter-label {
+  width: 100%;
+
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+
+/* A small rounded filter button. aria-pressed="true" = selected. */
+.chip {
+  padding: 0.3rem 0.8rem;
+
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+
+  font-size: 0.85rem;
+}
+
+
+.chip:hover {
+  border-color: var(--ink-soft);
+}
+
+
+.chip[aria-pressed="true"] {
+  border-color: var(--stamp);
+  background: var(--stamp);
+  color: #fff;
+}
+
+
+/* Dark mode: the green is light, so use dark text on it. */
+[data-theme="dark"] .chip[aria-pressed="true"] {
+  color: #17181A;
+}
+
+
+.library-count {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+
+/* ---------- The lists ---------- */
+
+.list-group {
+  margin-bottom: 1.25rem;
+}
+
+
+.list-group-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+
+  margin-bottom: 0.4rem;
+  padding-bottom: 0.3rem;
+
+  border-bottom: 1px solid var(--rule);
+  font-size: 1.05rem;
+}
+
+
+.list-group-count {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+
+.snippet-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+
+/* One snippet in the list: title on the left, difficulty on the right. */
+.snippet-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+
+  border-left: 3px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ink);
+
+  font-size: 0.92rem;
+  text-align: left;
+}
+
+
+.snippet-item:hover {
+  background: color-mix(in srgb, var(--rule) 35%, transparent);
+}
+
+
+/* The snippet that is open on the right. */
+.snippet-item.active {
+  border-left-color: var(--stamp);
+  background: color-mix(in srgb, var(--stamp) 14%, transparent);
+}
+
+
+.snippet-item-title {
+  min-width: 0;
+}
+
+
+/* ---------- Badges: language and difficulty ---------- */
+
+.badge {
+  flex: none;
+  padding: 0.12rem 0.55rem;
+
+  border: 1px solid color-mix(in srgb, var(--badge, var(--ink-soft)) 55%, var(--rule));
+  border-radius: 999px;
+  color: var(--badge, var(--ink-soft));
+
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+
+.badge-easy   { --badge: var(--stamp); }
+.badge-medium { --badge: var(--tok-cls); }
+.badge-hard   { --badge: var(--tok-str); }
+.badge-master { --badge: var(--gold); }
+
+
+/* ---------- The selected snippet (right side) ---------- */
+
+.snippet-detail {
+  min-width: 0;
+  padding: 1.75rem;
+
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+
+.detail-empty {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+
+.detail-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+
+.detail-title {
+  font-size: 1.6rem;
+  line-height: 1.2;
+}
+
+
+.detail-meta {
+  display: flex;
+  gap: 0.4rem;
+}
+
+
+/* ---------- Code with line numbers ---------- */
+
+.code-box {
+  margin: 1.25rem 0 1.75rem;
+
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+
+/* Bar above the code: number of lines, and the Copy button. */
+.code-box-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0.4rem 0.6rem 0.4rem 1rem;
+
+  border-bottom: 1px solid var(--rule);
+  background: color-mix(in srgb, var(--rule) 30%, var(--surface));
+
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+
+
+.copy-btn {
+  padding: 0.3rem 0.85rem;
+  font-size: 0.82rem;
+}
+
+
+.code-view {
+  padding: 1rem 0;
+  overflow-x: auto;
+
+  background: var(--surface);
+
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  line-height: 1.7;
+
+  /* Counter used to number the lines. */
+  counter-reset: line;
+}
+
+
+.code-line {
+  position: relative;
+  display: block;
+
+  /* Wide enough for the longest line, so the whole row scrolls together. */
+  width: max-content;
+  min-width: 100%;
+  min-height: 1.7em;
+  padding: 0 1.25rem 0 3.4rem;
+
+  white-space: pre;
+}
+
+
+/* The line number, drawn by CSS (it cannot be selected or copied). */
+.code-line::before {
+  counter-increment: line;
+  content: counter(line);
+
+  position: absolute;
+  left: 0;
+  width: 2.5rem;
+
+  text-align: right;
+  color: var(--ink-soft);
+  opacity: 0.55;
+  user-select: none;
+}
+
+
+/* Syntax colours (the same palette as the typing page). */
+.code-view [data-t="kw"]  { color: var(--tok-kw); }
+.code-view [data-t="str"] { color: var(--tok-str); }
+.code-view [data-t="num"] { color: var(--tok-num); }
+.code-view [data-t="com"] { color: var(--tok-com); }
+.code-view [data-t="fn"]  { color: var(--tok-fn); }
+.code-view [data-t="cls"] { color: var(--tok-cls); }
+
+
+/* ---------- Explanation ---------- */
+
+.detail-kicker {
+  margin: 1.5rem 0 0.5rem;
+
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--stamp);
+}
+
+
+.detail-summary {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+
+.detail-points {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+
+.detail-points li {
+  margin-bottom: 0.55rem;
+}
+
+
+/* Pieces of code written between `backticks` in the explanation. */
+.snippet-detail code {
+  padding: 0.1em 0.35em;
+
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--rule) 60%, transparent);
+
+  font-family: var(--mono);
+  font-size: 0.88em;
+  color: var(--ink);
+  overflow-wrap: anywhere;
 }
 
 
@@ -1531,6 +2344,27 @@ a.btn {
    ========================================================== */
 
 @media (max-width: 720px) {
+
+  /* Snippets page: lists on top, the selected snippet below. */
+  .library {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .library-side {
+    position: static;
+    max-height: none;
+    padding-right: 0;
+  }
+
+  .snippet-lists {
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+
+  .snippet-detail {
+    padding: 1.25rem;
+  }
 
   /* Rank picture a bit smaller on phones. */
   .rank-art {

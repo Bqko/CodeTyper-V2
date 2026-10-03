@@ -1,564 +1,1568 @@
 {
   "javascript": {
     "easy": [
-      [
-        "const name = \"Alex\";",
-        "console.log(\"Hello, \" + name);"
-      ],
-      [
-        "const numbers = [1, 2, 3, 4, 5];",
-        "",
-        "const sum = numbers.reduce(",
-        "    (total, number) => total + number,",
-        "    0",
-        ");",
-        "",
-        "console.log(sum);"
-      ],
-      [
-        "function isEven(number) {",
-        "    return number % 2 === 0;",
-        "}",
-        "",
-        "console.log(isEven(10));"
-      ],
-      [
-        "function greet(name) {",
-        "    return `Hello, ${name}!`;",
-        "}",
-        "",
-        "console.log(greet(\"World\"));"
-      ]
+      {
+        "title": "Hello with a variable",
+        "summary": "Stores a name in a variable and prints a greeting to the console.",
+        "points": [
+          "`const name = \"Alex\";` creates a variable that cannot be reassigned.",
+          "`\"Hello, \" + name` joins (concatenates) two strings into one.",
+          "`console.log(...)` prints the result, so the output is `Hello, Alex`."
+        ],
+        "code": [
+          "const name = \"Alex\";",
+          "console.log(\"Hello, \" + name);"
+        ]
+      },
+      {
+        "title": "Sum an array with reduce",
+        "summary": "Adds up all the numbers in an array and prints the total, which is 15.",
+        "points": [
+          "`reduce` walks through the array and carries a running result from one item to the next.",
+          "`(total, number) => total + number` is an arrow function that adds the current number to the running total.",
+          "The final `0` is the starting value of `total`."
+        ],
+        "code": [
+          "const numbers = [1, 2, 3, 4, 5];",
+          "",
+          "const sum = numbers.reduce(",
+          "    (total, number) => total + number,",
+          "    0",
+          ");",
+          "",
+          "console.log(sum);"
+        ]
+      },
+      {
+        "title": "Check if a number is even",
+        "summary": "Defines a function that tells you whether a number is even, then tests it with 10.",
+        "points": [
+          "`number % 2` gives the remainder after dividing by 2.",
+          "`=== 0` checks that the remainder is exactly 0, which is only true for even numbers.",
+          "`return` sends the true or false answer back to the caller, so `console.log` prints `true`."
+        ],
+        "code": [
+          "function isEven(number) {",
+          "    return number % 2 === 0;",
+          "}",
+          "",
+          "console.log(isEven(10));"
+        ]
+      },
+      {
+        "title": "Greeting with a template string",
+        "summary": "Builds a greeting with a template string and prints `Hello, World!`.",
+        "points": [
+          "Backticks create a template string, which can contain values inside the text.",
+          "`${name}` is replaced by the value of the variable `name`.",
+          "`greet(\"World\")` passes `\"World\"` into the function and the returned text is printed."
+        ],
+        "code": [
+          "function greet(name) {",
+          "    return `Hello, ${name}!`;",
+          "}",
+          "",
+          "console.log(greet(\"World\"));"
+        ]
+      }
     ],
     "medium": [
-      [
-        "function debounce(fn, delay) {",
-        "    let timer;",
-        "",
-        "    return (...args) => {",
-        "        clearTimeout(timer);",
-        "",
-        "        timer = setTimeout(() => {",
-        "            fn(...args);",
-        "        }, delay);",
-        "    };",
-        "}"
-      ],
-      [
-        "function countWords(text) {",
-        "    const words = text.trim().split(/\\s+/);",
-        "",
-        "    return words.length;",
-        "}",
-        "",
-        "console.log(countWords(\"Hello world from JavaScript\"));"
-      ],
-      [
-        "const users = [",
-        "    { name: \"Alex\", age: 20 },",
-        "    { name: \"Sam\", age: 25 },",
-        "    { name: \"John\", age: 17 }",
-        "];",
-        "",
-        "const adults = users.filter(user => user.age >= 18);",
-        "",
-        "console.log(adults);"
-      ],
-      [
-        "function findMax(numbers) {",
-        "    if (numbers.length === 0) {",
-        "        return null;",
-        "    }",
-        "",
-        "    return Math.max(...numbers);",
-        "}",
-        "",
-        "console.log(findMax([4, 8, 2, 15, 6]));"
-      ]
+      {
+        "title": "Debounce",
+        "summary": "Wraps a function so it only runs after calls have stopped for a given delay. This is common for search boxes and window resizing.",
+        "points": [
+          "`timer` lives outside the returned function, so it remembers the pending timeout between calls (a closure).",
+          "`(...args)` collects whatever arguments the caller passes, so they can be forwarded later.",
+          "`clearTimeout(timer)` cancels the previous waiting call.",
+          "`setTimeout` then schedules `fn(...args)` after `delay` milliseconds, so only the last call in a quick burst actually runs."
+        ],
+        "code": [
+          "function debounce(fn, delay) {",
+          "    let timer;",
+          "",
+          "    return (...args) => {",
+          "        clearTimeout(timer);",
+          "",
+          "        timer = setTimeout(() => {",
+          "            fn(...args);",
+          "        }, delay);",
+          "    };",
+          "}"
+        ]
+      },
+      {
+        "title": "Count words",
+        "summary": "Counts how many words are in a sentence. The example prints 4.",
+        "points": [
+          "`trim()` removes spaces from both ends of the text.",
+          "`split(/\\s+/)` cuts the text wherever one or more whitespace characters appear. `/\\s+/` is a regular expression.",
+          "`words.length` is the number of pieces, which is the word count."
+        ],
+        "code": [
+          "function countWords(text) {",
+          "    const words = text.trim().split(/\\s+/);",
+          "",
+          "    return words.length;",
+          "}",
+          "",
+          "console.log(countWords(\"Hello world from JavaScript\"));"
+        ]
+      },
+      {
+        "title": "Filter adults",
+        "summary": "Keeps only the users who are 18 or older and prints them.",
+        "points": [
+          "`users` is an array of objects, each with a `name` and an `age`.",
+          "`filter` builds a new array with only the items for which the function returns true.",
+          "`user.age >= 18` is the test, so Alex and Sam stay and John (17) is removed."
+        ],
+        "code": [
+          "const users = [",
+          "    { name: \"Alex\", age: 20 },",
+          "    { name: \"Sam\", age: 25 },",
+          "    { name: \"John\", age: 17 }",
+          "];",
+          "",
+          "const adults = users.filter(user => user.age >= 18);",
+          "",
+          "console.log(adults);"
+        ]
+      },
+      {
+        "title": "Find the maximum",
+        "summary": "Returns the largest number in an array, or `null` if the array is empty. The example prints 15.",
+        "points": [
+          "The `if` at the top is a guard: an empty array has no maximum, so it returns `null` early.",
+          "`Math.max` expects separate numbers, not an array.",
+          "The spread operator `...numbers` unpacks the array into separate arguments."
+        ],
+        "code": [
+          "function findMax(numbers) {",
+          "    if (numbers.length === 0) {",
+          "        return null;",
+          "    }",
+          "",
+          "    return Math.max(...numbers);",
+          "}",
+          "",
+          "console.log(findMax([4, 8, 2, 15, 6]));"
+        ]
+      }
     ],
     "hard": [
-      [
-        "async function fetchUser(id) {",
-        "    try {",
-        "        const response = await fetch(`/api/users/${id}`);",
-        "",
-        "        if (!response.ok) {",
-        "            throw new Error(`Request failed: ${response.status}`);",
-        "        }",
-        "",
-        "        const { name, email } = await response.json();",
-        "        return { name, email, active: true };",
-        "    } catch (error) {",
-        "        console.error(error.message);",
-        "        return null;",
-        "    }",
-        "}"
-      ],
-      [
-        "class Cache {",
-        "    constructor(limit = 3) {",
-        "        this.limit = limit;",
-        "        this.items = new Map();",
-        "    }",
-        "",
-        "    get(key) {",
-        "        if (!this.items.has(key)) return undefined;",
-        "",
-        "        const value = this.items.get(key);",
-        "        this.items.delete(key);",
-        "        this.items.set(key, value);",
-        "        return value;",
-        "    }",
-        "",
-        "    set(key, value) {",
-        "        if (this.items.size >= this.limit) {",
-        "            const oldest = this.items.keys().next().value;",
-        "            this.items.delete(oldest);",
-        "        }",
-        "",
-        "        this.items.set(key, value);",
-        "    }",
-        "}"
-      ],
-      [
-        "function groupBy(items, getKey) {",
-        "    return items.reduce((groups, item) => {",
-        "        const key = getKey(item);",
-        "",
-        "        if (!groups[key]) {",
-        "            groups[key] = [];",
-        "        }",
-        "",
-        "        groups[key].push(item);",
-        "        return groups;",
-        "    }, {});",
-        "}",
-        "",
-        "const words = [\"apple\", \"bat\", \"cat\", \"avocado\"];",
-        "console.log(groupBy(words, (word) => word[0]));"
-      ],
-      [
-        "const memoize = (fn) => {",
-        "    const cache = {};",
-        "",
-        "    return (...args) => {",
-        "        const key = JSON.stringify(args);",
-        "",
-        "        if (key in cache) {",
-        "            return cache[key];",
-        "        }",
-        "",
-        "        cache[key] = fn(...args);",
-        "        return cache[key];",
-        "    };",
-        "};",
-        "",
-        "const square = memoize((n) => n * n);",
-        "console.log(square(9), square(9));"
-      ]
+      {
+        "title": "Fetch a user from an API",
+        "summary": "Downloads a user from an API and returns their name and email, or `null` if anything goes wrong.",
+        "points": [
+          "`async` lets the function use `await`, which pauses until a promise (here the network request) finishes.",
+          "`if (!response.ok) { throw ... }` turns HTTP errors such as 404 into exceptions.",
+          "`const { name, email } = await response.json()` is destructuring: it pulls two fields out of the JSON object.",
+          "`try`/`catch` logs the error message and returns `null` instead of crashing."
+        ],
+        "code": [
+          "async function fetchUser(id) {",
+          "    try {",
+          "        const response = await fetch(`/api/users/${id}`);",
+          "",
+          "        if (!response.ok) {",
+          "            throw new Error(`Request failed: ${response.status}`);",
+          "        }",
+          "",
+          "        const { name, email } = await response.json();",
+          "        return { name, email, active: true };",
+          "    } catch (error) {",
+          "        console.error(error.message);",
+          "        return null;",
+          "    }",
+          "}"
+        ]
+      },
+      {
+        "title": "A cache that forgets the oldest item",
+        "summary": "A small cache that holds at most `limit` items and throws away the least recently used one when it is full.",
+        "points": [
+          "A `Map` remembers the order in which keys were added.",
+          "`get` deletes and re-adds the key, which moves it to the end and marks it as most recently used.",
+          "`set` removes the first key (`this.items.keys().next().value`), the oldest one, when the cache is full.",
+          "`limit = 3` is a default parameter, used when no value is passed."
+        ],
+        "code": [
+          "class Cache {",
+          "    constructor(limit = 3) {",
+          "        this.limit = limit;",
+          "        this.items = new Map();",
+          "    }",
+          "",
+          "    get(key) {",
+          "        if (!this.items.has(key)) return undefined;",
+          "",
+          "        const value = this.items.get(key);",
+          "        this.items.delete(key);",
+          "        this.items.set(key, value);",
+          "        return value;",
+          "    }",
+          "",
+          "    set(key, value) {",
+          "        if (this.items.size >= this.limit) {",
+          "            const oldest = this.items.keys().next().value;",
+          "            this.items.delete(oldest);",
+          "        }",
+          "",
+          "        this.items.set(key, value);",
+          "    }",
+          "}"
+        ]
+      },
+      {
+        "title": "Group items by a key",
+        "summary": "Groups the items of an array into an object, using a function to decide each item's group. Grouping the example words by first letter gives `a`, `b` and `c` groups.",
+        "points": [
+          "`reduce` starts with an empty object `{}` and passes it from item to item.",
+          "`getKey(item)` computes the group name for the current item.",
+          "If that group does not exist yet, an empty array is created, and then the item is pushed into it.",
+          "Returning `groups` at the end of each step hands it to the next item."
+        ],
+        "code": [
+          "function groupBy(items, getKey) {",
+          "    return items.reduce((groups, item) => {",
+          "        const key = getKey(item);",
+          "",
+          "        if (!groups[key]) {",
+          "            groups[key] = [];",
+          "        }",
+          "",
+          "        groups[key].push(item);",
+          "        return groups;",
+          "    }, {});",
+          "}",
+          "",
+          "const words = [\"apple\", \"bat\", \"cat\", \"avocado\"];",
+          "console.log(groupBy(words, (word) => word[0]));"
+        ]
+      },
+      {
+        "title": "Memoize a function",
+        "summary": "Wraps a function so that calling it again with the same arguments returns the saved result instead of recalculating. The example prints `81 81`.",
+        "points": [
+          "`cache` lives in the outer function, so every later call can see it (a closure).",
+          "`JSON.stringify(args)` turns the arguments into a string that can be used as a key.",
+          "`key in cache` checks whether the answer was already stored.",
+          "Otherwise `fn(...args)` runs once and its result is stored for next time."
+        ],
+        "code": [
+          "const memoize = (fn) => {",
+          "    const cache = {};",
+          "",
+          "    return (...args) => {",
+          "        const key = JSON.stringify(args);",
+          "",
+          "        if (key in cache) {",
+          "            return cache[key];",
+          "        }",
+          "",
+          "        cache[key] = fn(...args);",
+          "        return cache[key];",
+          "    };",
+          "};",
+          "",
+          "const square = memoize((n) => n * n);",
+          "console.log(square(9), square(9));"
+        ]
+      }
+    ],
+    "master": [
+      {
+        "title": "Event emitter",
+        "summary": "A small publish/subscribe system. Code can listen for named events and is notified whenever one is emitted.",
+        "points": [
+          "`#handlers` is a private field that only the class can touch. It is a `Map` from event names to lists of handlers.",
+          "`on` adds a handler (`?? []` gives an empty list when none exist yet) and returns a function that removes it again.",
+          "`once` wraps the handler so that it unsubscribes itself after the first call.",
+          "`emit` calls every handler with the given arguments. At the bottom the example listens for `\"ping\"`, emits it once, and unsubscribes with `stop()`."
+        ],
+        "code": [
+          "class EventEmitter {",
+          "    #handlers = new Map();",
+          "",
+          "    on(event, handler) {",
+          "        const list = this.#handlers.get(event) ?? [];",
+          "        this.#handlers.set(event, [...list, handler]);",
+          "        return () => this.off(event, handler);",
+          "    }",
+          "",
+          "    off(event, handler) {",
+          "        const list = this.#handlers.get(event) ?? [];",
+          "        this.#handlers.set(event, list.filter((fn) => fn !== handler));",
+          "    }",
+          "",
+          "    once(event, handler) {",
+          "        const wrapper = (...args) => {",
+          "            this.off(event, wrapper);",
+          "            handler(...args);",
+          "        };",
+          "",
+          "        return this.on(event, wrapper);",
+          "    }",
+          "",
+          "    emit(event, ...args) {",
+          "        for (const handler of this.#handlers.get(event) ?? []) {",
+          "            handler(...args);",
+          "        }",
+          "    }",
+          "}",
+          "",
+          "const emitter = new EventEmitter();",
+          "const stop = emitter.on(\"ping\", (n) => console.log(`ping ${n}`));",
+          "",
+          "emitter.emit(\"ping\", 1);",
+          "stop();"
+        ]
+      },
+      {
+        "title": "Retry an async task",
+        "summary": "Runs an async task and tries again if it fails, waiting a bit longer after each failure. In the example it fails twice, then succeeds and prints `ok 3`.",
+        "points": [
+          "`attempts = 3` and `delay = 200` are default parameters.",
+          "`return await task(attempt)` ends the whole function as soon as an attempt succeeds.",
+          "On failure, `catch` stores the error and waits `delay * attempt` milliseconds by wrapping `setTimeout` in a Promise.",
+          "If every attempt fails, the function throws a new error that includes the last error message."
+        ],
+        "code": [
+          "async function retry(task, attempts = 3, delay = 200) {",
+          "    let lastError;",
+          "",
+          "    for (let attempt = 1; attempt <= attempts; attempt++) {",
+          "        try {",
+          "            return await task(attempt);",
+          "        } catch (error) {",
+          "            lastError = error;",
+          "            await new Promise((resolve) => setTimeout(resolve, delay * attempt));",
+          "        }",
+          "    }",
+          "",
+          "    throw new Error(`Failed after ${attempts} attempts: ${lastError.message}`);",
+          "}",
+          "",
+          "let calls = 0;",
+          "",
+          "retry(async () => {",
+          "    calls++;",
+          "    if (calls < 3) throw new Error(\"flaky\");",
+          "    return \"ok\";",
+          "}).then((value) => console.log(value, calls));"
+        ]
+      },
+      {
+        "title": "Deep equal and deep clone",
+        "summary": "Two helpers that work on nested objects: one checks whether two values are structurally equal, the other makes an independent copy.",
+        "points": [
+          "`deepEqual` returns `true` for identical references, and `false` for non-objects or `null`.",
+          "It then compares the number of keys and uses `every` to check each key recursively.",
+          "`deepClone` maps over arrays, and for objects it uses `Object.entries` and `Object.fromEntries` to rebuild each property with a cloned value.",
+          "Primitive values such as numbers and strings are returned as they are."
+        ],
+        "code": [
+          "function deepEqual(a, b) {",
+          "    if (a === b) return true;",
+          "",
+          "    if (typeof a !== \"object\" || typeof b !== \"object\" || !a || !b) {",
+          "        return false;",
+          "    }",
+          "",
+          "    const keysA = Object.keys(a);",
+          "    const keysB = Object.keys(b);",
+          "",
+          "    if (keysA.length !== keysB.length) return false;",
+          "",
+          "    return keysA.every((key) => deepEqual(a[key], b[key]));",
+          "}",
+          "",
+          "function deepClone(value) {",
+          "    if (Array.isArray(value)) return value.map(deepClone);",
+          "",
+          "    if (value && typeof value === \"object\") {",
+          "        return Object.fromEntries(",
+          "            Object.entries(value).map(([key, item]) => [key, deepClone(item)])",
+          "        );",
+          "    }",
+          "",
+          "    return value;",
+          "}"
+        ]
+      },
+      {
+        "title": "Pipe, curry and debounce",
+        "summary": "Three small functional helpers. The last two lines run `pipe` and `curry` together and print 60.",
+        "points": [
+          "`pipe` runs functions from left to right, feeding each result into the next one with `reduce`.",
+          "`curry` lets you pass arguments one at a time. It collects them until `fn.length` arguments are available, then calls the function.",
+          "`debounce` waits for calls to stop before running the function, and cancels earlier timers with `clearTimeout`.",
+          "`add(1)(2)` waits for the third number, so `pipe(...)(3)` computes 1 + 2 + 3 = 6 and then multiplies it by 10."
+        ],
+        "code": [
+          "const pipe = (...fns) => (input) => fns.reduce((value, fn) => fn(value), input);",
+          "",
+          "const curry = (fn) =>",
+          "    function curried(...args) {",
+          "        return args.length >= fn.length",
+          "            ? fn(...args)",
+          "            : (...next) => curried(...args, ...next);",
+          "    };",
+          "",
+          "const debounce = (fn, wait = 100) => {",
+          "    let timer;",
+          "",
+          "    return (...args) => {",
+          "        clearTimeout(timer);",
+          "        timer = setTimeout(() => fn(...args), wait);",
+          "    };",
+          "};",
+          "",
+          "const add = curry((a, b, c) => a + b + c);",
+          "console.log(pipe(add(1)(2), (x) => x * 10)(3));"
+        ]
+      }
     ]
   },
   "python": {
     "easy": [
-      [
-        "name = \"Alex\"",
-        "age = 20",
-        "",
-        "print(\"Name:\", name)",
-        "print(\"Age:\", age)"
-      ],
-      [
-        "numbers = [1, 2, 3, 4, 5]",
-        "",
-        "total = sum(numbers)",
-        "",
-        "print(total)"
-      ],
-      [
-        "def is_even(number):",
-        "    return number % 2 == 0",
-        "",
-        "print(is_even(10))"
-      ],
-      [
-        "for number in range(1, 6):",
-        "    print(number)"
-      ]
+      {
+        "title": "Variables and print",
+        "summary": "Stores a name and an age in variables and prints them.",
+        "points": [
+          "`name = \"Alex\"` stores text (a string) and `age = 20` stores a whole number.",
+          "`print(\"Name:\", name)` prints several values, separated by a space.",
+          "The output is `Name: Alex` and then `Age: 20`."
+        ],
+        "code": [
+          "name = \"Alex\"",
+          "age = 20",
+          "",
+          "print(\"Name:\", name)",
+          "print(\"Age:\", age)"
+        ]
+      },
+      {
+        "title": "Sum a list",
+        "summary": "Adds up the numbers in a list and prints 15.",
+        "points": [
+          "A list is written with square brackets, with items separated by commas.",
+          "`sum(numbers)` is a built-in function that adds every item together.",
+          "`print(total)` shows the result."
+        ],
+        "code": [
+          "numbers = [1, 2, 3, 4, 5]",
+          "",
+          "total = sum(numbers)",
+          "",
+          "print(total)"
+        ]
+      },
+      {
+        "title": "Check if a number is even",
+        "summary": "Defines a function that tells you whether a number is even, then tests it with 10.",
+        "points": [
+          "`def` starts a function definition, and the indented lines below it are its body.",
+          "`number % 2 == 0` is true when dividing by 2 leaves no remainder.",
+          "`return` sends the result back, so `print(...)` shows `True`."
+        ],
+        "code": [
+          "def is_even(number):",
+          "    return number % 2 == 0",
+          "",
+          "print(is_even(10))"
+        ]
+      },
+      {
+        "title": "Loop with range",
+        "summary": "Prints the numbers 1 to 5, one per line.",
+        "points": [
+          "`range(1, 6)` produces 1, 2, 3, 4 and 5. The end value 6 is not included.",
+          "`for number in ...` repeats the body once for each value.",
+          "The indentation shows which lines belong to the loop."
+        ],
+        "code": [
+          "for number in range(1, 6):",
+          "    print(number)"
+        ]
+      }
     ],
     "medium": [
-      [
-        "def fibonacci(n):",
-        "    a, b = 0, 1",
-        "",
-        "    for _ in range(n):",
-        "        a, b = b, a + b",
-        "",
-        "    return a"
-      ],
-      [
-        "class Stack:",
-        "    def __init__(self):",
-        "        self.items = []",
-        "",
-        "    def push(self, item):",
-        "        self.items.append(item)",
-        "",
-        "    def pop(self):",
-        "        if not self.items:",
-        "            return None",
-        "",
-        "        return self.items.pop()"
-      ],
-      [
-        "def count_words(text):",
-        "    words = text.lower().split()",
-        "    counts = {}",
-        "",
-        "    for word in words:",
-        "        counts[word] = counts.get(word, 0) + 1",
-        "",
-        "    return counts"
-      ],
-      [
-        "numbers = [4, 8, 15, 16, 23, 42]",
-        "",
-        "even_numbers = [",
-        "    number",
-        "    for number in numbers",
-        "    if number % 2 == 0",
-        "]",
-        "",
-        "print(even_numbers)"
-      ]
+      {
+        "title": "Fibonacci number",
+        "summary": "Returns the n-th number of the Fibonacci sequence (0, 1, 1, 2, 3, 5, 8, ...).",
+        "points": [
+          "`a, b = 0, 1` sets both starting values in one line.",
+          "`for _ in range(n)` repeats n times. The underscore means the loop variable is not used.",
+          "`a, b = b, a + b` updates both at once: `a` becomes the old `b`, and `b` becomes the sum.",
+          "After the loop, `return a` gives the answer."
+        ],
+        "code": [
+          "def fibonacci(n):",
+          "    a, b = 0, 1",
+          "",
+          "    for _ in range(n):",
+          "        a, b = b, a + b",
+          "",
+          "    return a"
+        ]
+      },
+      {
+        "title": "A stack class",
+        "summary": "A stack stores items so the last one added is the first one removed (\"last in, first out\").",
+        "points": [
+          "`__init__` runs when an object is created. It gives each stack its own empty list in `self.items`.",
+          "`push` adds an item to the end of the list with `append`.",
+          "`pop` removes and returns the last item. `if not self.items` checks for an empty stack and returns `None` instead."
+        ],
+        "code": [
+          "class Stack:",
+          "    def __init__(self):",
+          "        self.items = []",
+          "",
+          "    def push(self, item):",
+          "        self.items.append(item)",
+          "",
+          "    def pop(self):",
+          "        if not self.items:",
+          "            return None",
+          "",
+          "        return self.items.pop()"
+        ]
+      },
+      {
+        "title": "Count word frequency",
+        "summary": "Counts how often each word appears in a text and returns the counts in a dictionary.",
+        "points": [
+          "`text.lower().split()` makes everything lowercase and splits the text into a list of words.",
+          "`counts = {}` is an empty dictionary that maps each word to its count.",
+          "`counts.get(word, 0) + 1` reads the current count (0 if the word is new) and adds one."
+        ],
+        "code": [
+          "def count_words(text):",
+          "    words = text.lower().split()",
+          "    counts = {}",
+          "",
+          "    for word in words:",
+          "        counts[word] = counts.get(word, 0) + 1",
+          "",
+          "    return counts"
+        ]
+      },
+      {
+        "title": "List comprehension",
+        "summary": "Builds a new list that keeps only the even numbers. The output is `[4, 8, 16, 42]`.",
+        "points": [
+          "A list comprehension has the form `[value for item in list if condition]`.",
+          "`number % 2 == 0` is the condition, so only even numbers are kept.",
+          "It is a shorter way to write a loop that builds a list."
+        ],
+        "code": [
+          "numbers = [4, 8, 15, 16, 23, 42]",
+          "",
+          "even_numbers = [",
+          "    number",
+          "    for number in numbers",
+          "    if number % 2 == 0",
+          "]",
+          "",
+          "print(even_numbers)"
+        ]
+      }
     ],
     "hard": [
-      [
-        "import time",
-        "from functools import wraps",
-        "",
-        "def timer(func):",
-        "    @wraps(func)",
-        "    def wrapper(*args, **kwargs):",
-        "        start = time.perf_counter()",
-        "        result = func(*args, **kwargs)",
-        "        elapsed = time.perf_counter() - start",
-        "        print(f\"{func.__name__} took {elapsed:.4f}s\")",
-        "        return result",
-        "    return wrapper"
-      ],
-      [
-        "def binary_search(items: list[int], target: int) -> int:",
-        "    low, high = 0, len(items) - 1",
-        "",
-        "    while low <= high:",
-        "        mid = (low + high) // 2",
-        "",
-        "        if items[mid] == target:",
-        "            return mid",
-        "        elif items[mid] < target:",
-        "            low = mid + 1",
-        "        else:",
-        "            high = mid - 1",
-        "",
-        "    return -1"
-      ],
-      [
-        "def top_words(text, limit=3):",
-        "    counts = {}",
-        "",
-        "    for word in text.lower().split():",
-        "        word = word.strip(\".,!?\")",
-        "        counts[word] = counts.get(word, 0) + 1",
-        "",
-        "    ranked = sorted(counts.items(), key=lambda pair: (-pair[1], pair[0]))",
-        "    return [word for word, _ in ranked[:limit]]"
-      ],
-      [
-        "def read_lines(path):",
-        "    try:",
-        "        with open(path, encoding=\"utf-8\") as file:",
-        "            for number, line in enumerate(file, start=1):",
-        "                yield number, line.rstrip(\"\\n\")",
-        "    except FileNotFoundError:",
-        "        print(f\"File not found: {path}\")"
-      ]
+      {
+        "title": "Timer decorator",
+        "summary": "A decorator that measures and prints how long a function takes to run.",
+        "points": [
+          "A decorator takes a function and returns a new function (`wrapper`) that adds extra behaviour around it.",
+          "`*args, **kwargs` accept any arguments and pass them on unchanged.",
+          "`@wraps(func)` keeps the original function's name and documentation.",
+          "`time.perf_counter()` is a precise clock, and `:.4f` in the f-string prints the time with 4 decimals."
+        ],
+        "code": [
+          "import time",
+          "from functools import wraps",
+          "",
+          "def timer(func):",
+          "    @wraps(func)",
+          "    def wrapper(*args, **kwargs):",
+          "        start = time.perf_counter()",
+          "        result = func(*args, **kwargs)",
+          "        elapsed = time.perf_counter() - start",
+          "        print(f\"{func.__name__} took {elapsed:.4f}s\")",
+          "        return result",
+          "    return wrapper"
+        ]
+      },
+      {
+        "title": "Binary search",
+        "summary": "Finds the position of a value in a sorted list by repeatedly halving the search range. It returns -1 if the value is missing.",
+        "points": [
+          "`low` and `high` mark the part of the list that is still possible.",
+          "`mid = (low + high) // 2` is the middle index (`//` is whole-number division).",
+          "If the middle item is too small, `low` moves up. If it is too big, `high` moves down.",
+          "`list[int]` and `-> int` are type hints. They document the types but are not enforced."
+        ],
+        "code": [
+          "def binary_search(items: list[int], target: int) -> int:",
+          "    low, high = 0, len(items) - 1",
+          "",
+          "    while low <= high:",
+          "        mid = (low + high) // 2",
+          "",
+          "        if items[mid] == target:",
+          "            return mid",
+          "        elif items[mid] < target:",
+          "            low = mid + 1",
+          "        else:",
+          "            high = mid - 1",
+          "",
+          "    return -1"
+        ]
+      },
+      {
+        "title": "Most common words",
+        "summary": "Returns the most frequent words in a text.",
+        "points": [
+          "`word.strip(\".,!?\")` removes punctuation from both ends of each word.",
+          "`counts.get(word, 0) + 1` counts each word.",
+          "`sorted(..., key=lambda pair: (-pair[1], pair[0]))` sorts by count from high to low (the minus sign reverses it), then alphabetically.",
+          "`[word for word, _ in ranked[:limit]]` keeps only the words of the first `limit` pairs."
+        ],
+        "code": [
+          "def top_words(text, limit=3):",
+          "    counts = {}",
+          "",
+          "    for word in text.lower().split():",
+          "        word = word.strip(\".,!?\")",
+          "        counts[word] = counts.get(word, 0) + 1",
+          "",
+          "    ranked = sorted(counts.items(), key=lambda pair: (-pair[1], pair[0]))",
+          "    return [word for word, _ in ranked[:limit]]"
+        ]
+      },
+      {
+        "title": "Read a file line by line",
+        "summary": "A generator that reads a file and hands back each line together with its line number.",
+        "points": [
+          "`with open(...)` closes the file automatically, even if an error happens.",
+          "`enumerate(file, start=1)` pairs each line with a number that starts at 1.",
+          "`yield` returns one value at a time without loading the whole file into memory.",
+          "`except FileNotFoundError` prints a message if the file does not exist."
+        ],
+        "code": [
+          "def read_lines(path):",
+          "    try:",
+          "        with open(path, encoding=\"utf-8\") as file:",
+          "            for number, line in enumerate(file, start=1):",
+          "                yield number, line.rstrip(\"\\n\")",
+          "    except FileNotFoundError:",
+          "        print(f\"File not found: {path}\")"
+        ]
+      }
+    ],
+    "master": [
+      {
+        "title": "Binary search tree node",
+        "summary": "A tree node that can insert values, list them in sorted order and measure the height of the tree.",
+        "points": [
+          "`@dataclass` generates the constructor and other boilerplate from the annotated fields. `Optional[\"Node\"]` means a node or `None`.",
+          "`insert` picks `\"left\"` or `\"right\"`, then uses `getattr` and `setattr` to read or write that attribute by name, recursing if a child already exists.",
+          "`inorder` uses `yield from` to visit the left side, then this node, then the right side, which produces sorted values.",
+          "`height` is 1 plus the height of the taller child."
+        ],
+        "code": [
+          "from dataclasses import dataclass",
+          "from typing import Optional",
+          "",
+          "@dataclass",
+          "class Node:",
+          "    value: int",
+          "    left: Optional[\"Node\"] = None",
+          "    right: Optional[\"Node\"] = None",
+          "",
+          "    def insert(self, value: int) -> None:",
+          "        side = \"left\" if value < self.value else \"right\"",
+          "        child = getattr(self, side)",
+          "",
+          "        if child is None:",
+          "            setattr(self, side, Node(value))",
+          "        else:",
+          "            child.insert(value)",
+          "",
+          "    def inorder(self):",
+          "        if self.left:",
+          "            yield from self.left.inorder()",
+          "        yield self.value",
+          "        if self.right:",
+          "            yield from self.right.inorder()",
+          "",
+          "    def height(self):",
+          "        left = self.left.height() if self.left else 0",
+          "        right = self.right.height() if self.right else 0",
+          "        return 1 + max(left, right)"
+        ]
+      },
+      {
+        "title": "Group emails by domain",
+        "summary": "Finds email-like text with a regular expression, groups the user names by domain, and can also validate one email address.",
+        "points": [
+          "`re.compile` prepares the pattern once. `(?P<user>...)` and `(?P<domain>...)` are named groups.",
+          "`finditer` yields every match, and `match[\"domain\"]` reads one named group.",
+          "`defaultdict(list)` creates an empty list automatically the first time a domain appears.",
+          "`re.fullmatch` in `is_valid` requires the whole string to match, and `bool(...)` turns the result into `True` or `False`."
+        ],
+        "code": [
+          "import re",
+          "from collections import defaultdict",
+          "",
+          "PATTERN = re.compile(r\"(?P<user>\\w+)@(?P<domain>[\\w.]+)\")",
+          "",
+          "def group_by_domain(text):",
+          "    groups = defaultdict(list)",
+          "",
+          "    for match in PATTERN.finditer(text):",
+          "        groups[match[\"domain\"]].append(match[\"user\"])",
+          "",
+          "    return {domain: sorted(users) for domain, users in groups.items()}",
+          "",
+          "def is_valid(email):",
+          "    return bool(re.fullmatch(r\"[\\w.+-]+@[\\w-]+(\\.[\\w-]+)+\", email))"
+        ]
+      },
+      {
+        "title": "Async tasks with a limit",
+        "summary": "Runs several async tasks at the same time, but lets only two of them work at once.",
+        "points": [
+          "`async def` defines a coroutine, and `await asyncio.sleep(delay)` pauses it without blocking the others.",
+          "`asyncio.Semaphore(2)` is a counter that allows at most two holders at a time.",
+          "`async with semaphore` takes a slot and releases it automatically when the block ends.",
+          "`asyncio.gather(*tasks)` runs all the tasks and returns their results in order, and `asyncio.run(main())` starts everything."
+        ],
+        "code": [
+          "import asyncio",
+          "",
+          "async def fetch(name, delay):",
+          "    await asyncio.sleep(delay)",
+          "    return f\"{name} done in {delay:.1f}s\"",
+          "",
+          "async def limited(semaphore, name):",
+          "    async with semaphore:",
+          "        return await fetch(name, 0.1)",
+          "",
+          "async def main():",
+          "    semaphore = asyncio.Semaphore(2)",
+          "    tasks = [limited(semaphore, f\"task-{i}\") for i in range(1, 5)]",
+          "    results = await asyncio.gather(*tasks)",
+          "",
+          "    for line in results:",
+          "        print(line)",
+          "",
+          "asyncio.run(main())"
+        ]
+      },
+      {
+        "title": "A Vector class with operators",
+        "summary": "A 2D vector class that works with Python's normal operators.",
+        "points": [
+          "`__add__` makes `+` work, and `__mul__` makes `*` work with a number.",
+          "`__eq__` defines what `==` means, by comparing the coordinates as tuples.",
+          "`dot` computes the dot product, and `__abs__` makes `abs(v)` return the length using `** 0.5` (the square root).",
+          "`__repr__` controls how the object is displayed when printed."
+        ],
+        "code": [
+          "class Vector:",
+          "    def __init__(self, x, y):",
+          "        self.x, self.y = x, y",
+          "",
+          "    def __add__(self, other):",
+          "        return Vector(self.x + other.x, self.y + other.y)",
+          "",
+          "    def __mul__(self, scalar):",
+          "        return Vector(self.x * scalar, self.y * scalar)",
+          "",
+          "    def __eq__(self, other):",
+          "        return (self.x, self.y) == (other.x, other.y)",
+          "",
+          "    def dot(self, other):",
+          "        return self.x * other.x + self.y * other.y",
+          "",
+          "    def __abs__(self):",
+          "        return self.dot(self) ** 0.5",
+          "",
+          "    def __repr__(self):",
+          "        return f\"Vector({self.x}, {self.y})\""
+        ]
+      }
     ]
   },
   "java": {
     "easy": [
-      [
-        "public class Main {",
-        "    public static void main(String[] args) {",
-        "        System.out.println(\"Hello, World!\");",
-        "    }",
-        "}"
-      ],
-      [
-        "public class Calculator {",
-        "    public int add(int a, int b) {",
-        "        return a + b;",
-        "    }",
-        "}"
-      ],
-      [
-        "public class Counter {",
-        "    private int count = 0;",
-        "",
-        "    public void increment() {",
-        "        count++;",
-        "    }",
-        "",
-        "    public int getCount() {",
-        "        return count;",
-        "    }",
-        "}"
-      ],
-      [
-        "public class Main {",
-        "    public static void main(String[] args) {",
-        "        for (int i = 1; i <= 5; i++) {",
-        "            System.out.println(i);",
-        "        }",
-        "    }",
-        "}"
-      ]
+      {
+        "title": "Hello, World",
+        "summary": "The classic first Java program. It prints `Hello, World!`.",
+        "points": [
+          "`public class Main` declares a class. Every Java program lives inside classes.",
+          "`public static void main(String[] args)` is the entry point, which is where Java starts running.",
+          "`System.out.println(\"Hello, World!\")` prints the text followed by a new line."
+        ],
+        "code": [
+          "public class Main {",
+          "    public static void main(String[] args) {",
+          "        System.out.println(\"Hello, World!\");",
+          "    }",
+          "}"
+        ]
+      },
+      {
+        "title": "Calculator with an add method",
+        "summary": "A class with one method that adds two whole numbers.",
+        "points": [
+          "`public int add(int a, int b)` declares a method that takes two `int` values and returns an `int`.",
+          "`int` is the type for whole numbers.",
+          "`return a + b;` sends the sum back to whoever called the method."
+        ],
+        "code": [
+          "public class Calculator {",
+          "    public int add(int a, int b) {",
+          "        return a + b;",
+          "    }",
+          "}"
+        ]
+      },
+      {
+        "title": "Counter",
+        "summary": "A class that keeps a count and lets other code add to it or read it.",
+        "points": [
+          "`private int count = 0;` is a field that is hidden from outside the class. This is called encapsulation.",
+          "`increment()` adds one with `count++`, and `void` means it returns nothing.",
+          "`getCount()` is a getter: it returns the value, so other code can read it but not change it directly."
+        ],
+        "code": [
+          "public class Counter {",
+          "    private int count = 0;",
+          "",
+          "    public void increment() {",
+          "        count++;",
+          "    }",
+          "",
+          "    public int getCount() {",
+          "        return count;",
+          "    }",
+          "}"
+        ]
+      },
+      {
+        "title": "Loop from 1 to 5",
+        "summary": "Prints the numbers 1 to 5, one per line.",
+        "points": [
+          "A `for` loop has three parts: the start `int i = 1`, the condition `i <= 5`, and the step `i++`.",
+          "The loop body runs once for every value of `i`.",
+          "`System.out.println(i)` prints the current number."
+        ],
+        "code": [
+          "public class Main {",
+          "    public static void main(String[] args) {",
+          "        for (int i = 1; i <= 5; i++) {",
+          "            System.out.println(i);",
+          "        }",
+          "    }",
+          "}"
+        ]
+      }
     ],
     "medium": [
-      [
-        "public class Calculator {",
-        "",
-        "    public int factorial(int n) {",
-        "        if (n <= 1) {",
-        "            return 1;",
-        "        }",
-        "",
-        "        return n * factorial(n - 1);",
-        "    }",
-        "}"
-      ],
-      [
-        "import java.util.ArrayList;",
-        "import java.util.List;",
-        "",
-        "public class Main {",
-        "    public static void main(String[] args) {",
-        "        List<String> names = new ArrayList<>();",
-        "",
-        "        names.add(\"Alex\");",
-        "        names.add(\"Sam\");",
-        "        names.add(\"John\");",
-        "",
-        "        for (String name : names) {",
-        "            System.out.println(name);",
-        "        }",
-        "    }",
-        "}"
-      ],
-      [
-        "public class BankAccount {",
-        "    private double balance;",
-        "",
-        "    public BankAccount(double balance) {",
-        "        this.balance = balance;",
-        "    }",
-        "",
-        "    public void deposit(double amount) {",
-        "        if (amount > 0) {",
-        "            balance += amount;",
-        "        }",
-        "    }",
-        "",
-        "    public double getBalance() {",
-        "        return balance;",
-        "    }",
-        "}"
-      ],
-      [
-        "public class Search {",
-        "",
-        "    public static int find(int[] numbers, int target) {",
-        "        for (int i = 0; i < numbers.length; i++) {",
-        "            if (numbers[i] == target) {",
-        "                return i;",
-        "            }",
-        "        }",
-        "",
-        "        return -1;",
-        "    }",
-        "}"
-      ]
+      {
+        "title": "Factorial with recursion",
+        "summary": "Calculates n! (n × (n-1) × ... × 1) by having the method call itself.",
+        "points": [
+          "`if (n <= 1) return 1;` is the base case. It stops the recursion.",
+          "`n * factorial(n - 1)` calls the method again with a smaller number.",
+          "For example, `factorial(4)` becomes 4 × 3 × 2 × 1 = 24."
+        ],
+        "code": [
+          "public class Calculator {",
+          "",
+          "    public int factorial(int n) {",
+          "        if (n <= 1) {",
+          "            return 1;",
+          "        }",
+          "",
+          "        return n * factorial(n - 1);",
+          "    }",
+          "}"
+        ]
+      },
+      {
+        "title": "A list of names",
+        "summary": "Creates a list of three names and prints each one.",
+        "points": [
+          "`List<String>` is a list that holds text values, and `new ArrayList<>()` creates a resizable list. The empty `<>` lets Java infer the type.",
+          "`names.add(...)` appends an item to the end.",
+          "`for (String name : names)` is a for-each loop that visits every item in order."
+        ],
+        "code": [
+          "import java.util.ArrayList;",
+          "import java.util.List;",
+          "",
+          "public class Main {",
+          "    public static void main(String[] args) {",
+          "        List<String> names = new ArrayList<>();",
+          "",
+          "        names.add(\"Alex\");",
+          "        names.add(\"Sam\");",
+          "        names.add(\"John\");",
+          "",
+          "        for (String name : names) {",
+          "            System.out.println(name);",
+          "        }",
+          "    }",
+          "}"
+        ]
+      },
+      {
+        "title": "Bank account",
+        "summary": "A class that stores a balance and only accepts positive deposits.",
+        "points": [
+          "The constructor `BankAccount(double balance)` runs when the object is created and sets the starting balance.",
+          "`this.balance = balance` uses `this` to tell the field apart from the parameter with the same name.",
+          "`deposit` checks `amount > 0` before using `balance += amount`, which is simple validation.",
+          "`getBalance()` lets other code read the balance."
+        ],
+        "code": [
+          "public class BankAccount {",
+          "    private double balance;",
+          "",
+          "    public BankAccount(double balance) {",
+          "        this.balance = balance;",
+          "    }",
+          "",
+          "    public void deposit(double amount) {",
+          "        if (amount > 0) {",
+          "            balance += amount;",
+          "        }",
+          "    }",
+          "",
+          "    public double getBalance() {",
+          "        return balance;",
+          "    }",
+          "}"
+        ]
+      },
+      {
+        "title": "Linear search",
+        "summary": "Looks for a value in an array and returns its position, or -1 if it is not there.",
+        "points": [
+          "The loop goes through the array from index 0 to `numbers.length - 1`.",
+          "If `numbers[i] == target`, the method returns the index right away.",
+          "If the loop ends without a match, `return -1;` signals \"not found\".",
+          "`static` means you can call the method without creating an object first."
+        ],
+        "code": [
+          "public class Search {",
+          "",
+          "    public static int find(int[] numbers, int target) {",
+          "        for (int i = 0; i < numbers.length; i++) {",
+          "            if (numbers[i] == target) {",
+          "                return i;",
+          "            }",
+          "        }",
+          "",
+          "        return -1;",
+          "    }",
+          "}"
+        ]
+      }
     ],
     "hard": [
-      [
-        "import java.util.ArrayList;",
-        "import java.util.List;",
-        "",
-        "public class Inventory {",
-        "    private final List<String> items = new ArrayList<>();",
-        "",
-        "    public void add(String item) {",
-        "        if (item == null || item.isBlank()) {",
-        "            throw new IllegalArgumentException(\"Item is empty\");",
-        "        }",
-        "",
-        "        items.add(item.trim());",
-        "    }",
-        "",
-        "    public int count() {",
-        "        return items.size();",
-        "    }",
-        "}"
-      ],
-      [
-        "import java.util.HashMap;",
-        "import java.util.Map;",
-        "",
-        "public class Fibonacci {",
-        "    private static final Map<Integer, Long> memo = new HashMap<>();",
-        "",
-        "    public static long fib(int n) {",
-        "        if (n <= 1) {",
-        "            return n;",
-        "        }",
-        "",
-        "        if (memo.containsKey(n)) {",
-        "            return memo.get(n);",
-        "        }",
-        "",
-        "        long result = fib(n - 1) + fib(n - 2);",
-        "        memo.put(n, result);",
-        "        return result;",
-        "    }",
-        "}"
-      ],
-      [
-        "public static int parsePositive(String text) {",
-        "    try {",
-        "        int value = Integer.parseInt(text.trim());",
-        "",
-        "        if (value <= 0) {",
-        "            throw new IllegalArgumentException(\"Must be positive\");",
-        "        }",
-        "",
-        "        return value;",
-        "    } catch (NumberFormatException e) {",
-        "        System.out.println(\"Not a number: \" + text);",
-        "        return -1;",
-        "    } finally {",
-        "        System.out.println(\"Parsed: \" + text);",
-        "    }",
-        "}"
-      ],
-      [
-        "public static void bubbleSort(int[] numbers) {",
-        "    for (int i = 0; i < numbers.length - 1; i++) {",
-        "        for (int j = 0; j < numbers.length - i - 1; j++) {",
-        "            if (numbers[j] > numbers[j + 1]) {",
-        "                int temp = numbers[j];",
-        "                numbers[j] = numbers[j + 1];",
-        "                numbers[j + 1] = temp;",
-        "            }",
-        "        }",
-        "    }",
-        "}"
-      ]
+      {
+        "title": "Inventory",
+        "summary": "A class that stores item names and rejects empty ones.",
+        "points": [
+          "`private final List<String> items` is a list that cannot be replaced with a different list, but its contents can change.",
+          "`item == null || item.isBlank()` checks for a missing or whitespace-only name.",
+          "`throw new IllegalArgumentException(...)` stops the method and reports invalid input.",
+          "`item.trim()` removes extra spaces before the item is stored, and `count()` returns the list size."
+        ],
+        "code": [
+          "import java.util.ArrayList;",
+          "import java.util.List;",
+          "",
+          "public class Inventory {",
+          "    private final List<String> items = new ArrayList<>();",
+          "",
+          "    public void add(String item) {",
+          "        if (item == null || item.isBlank()) {",
+          "            throw new IllegalArgumentException(\"Item is empty\");",
+          "        }",
+          "",
+          "        items.add(item.trim());",
+          "    }",
+          "",
+          "    public int count() {",
+          "        return items.size();",
+          "    }",
+          "}"
+        ]
+      },
+      {
+        "title": "Fibonacci with a cache",
+        "summary": "Computes Fibonacci numbers with recursion, remembering results in a map so each one is only calculated once.",
+        "points": [
+          "`Map<Integer, Long>` stores pairs of `n` and its result, and `static` makes it shared by all calls.",
+          "`n <= 1` is the base case.",
+          "`memo.containsKey(n)` returns the saved result instead of recalculating it.",
+          "Otherwise it computes `fib(n - 1) + fib(n - 2)`, stores it with `put`, and returns it. `long` holds large values."
+        ],
+        "code": [
+          "import java.util.HashMap;",
+          "import java.util.Map;",
+          "",
+          "public class Fibonacci {",
+          "    private static final Map<Integer, Long> memo = new HashMap<>();",
+          "",
+          "    public static long fib(int n) {",
+          "        if (n <= 1) {",
+          "            return n;",
+          "        }",
+          "",
+          "        if (memo.containsKey(n)) {",
+          "            return memo.get(n);",
+          "        }",
+          "",
+          "        long result = fib(n - 1) + fib(n - 2);",
+          "        memo.put(n, result);",
+          "        return result;",
+          "    }",
+          "}"
+        ]
+      },
+      {
+        "title": "Parse a positive number",
+        "summary": "Converts text into a positive integer. If the text is not a number, it returns -1.",
+        "points": [
+          "`Integer.parseInt` throws a `NumberFormatException` when the text is not a valid number.",
+          "`throw new IllegalArgumentException(\"Must be positive\")` rejects zero and negative numbers. That exception is not caught here, so it goes on to the caller.",
+          "`catch (NumberFormatException e)` handles the bad-text case.",
+          "`finally` always runs, whether the code succeeded, returned early or threw an exception."
+        ],
+        "code": [
+          "public static int parsePositive(String text) {",
+          "    try {",
+          "        int value = Integer.parseInt(text.trim());",
+          "",
+          "        if (value <= 0) {",
+          "            throw new IllegalArgumentException(\"Must be positive\");",
+          "        }",
+          "",
+          "        return value;",
+          "    } catch (NumberFormatException e) {",
+          "        System.out.println(\"Not a number: \" + text);",
+          "        return -1;",
+          "    } finally {",
+          "        System.out.println(\"Parsed: \" + text);",
+          "    }",
+          "}"
+        ]
+      },
+      {
+        "title": "Bubble sort",
+        "summary": "Sorts an `int` array in place from smallest to largest.",
+        "points": [
+          "The outer loop makes repeated passes over the array.",
+          "The inner loop compares each pair of neighbours and swaps them when the left one is bigger.",
+          "`temp` holds one value temporarily so the swap does not lose it.",
+          "Each pass moves the largest remaining value to the end, so `numbers.length - i - 1` skips the part that is already sorted."
+        ],
+        "code": [
+          "public static void bubbleSort(int[] numbers) {",
+          "    for (int i = 0; i < numbers.length - 1; i++) {",
+          "        for (int j = 0; j < numbers.length - i - 1; j++) {",
+          "            if (numbers[j] > numbers[j + 1]) {",
+          "                int temp = numbers[j];",
+          "                numbers[j] = numbers[j + 1];",
+          "                numbers[j + 1] = temp;",
+          "            }",
+          "        }",
+          "    }",
+          "}"
+        ]
+      }
+    ],
+    "master": [
+      {
+        "title": "Generic list helpers",
+        "summary": "Two generic helper methods that work for lists of any suitable type.",
+        "points": [
+          "`<T extends Comparable<T>>` means `T` can be any type that can be compared with itself, such as `Integer` or `String`.",
+          "`max` throws an exception on an empty list, starts with the first item, and replaces `best` whenever `compareTo(best) > 0`, meaning the item is bigger.",
+          "`swap` exchanges two elements: it saves one in `temp`, writes the second into the first slot with `set`, then puts `temp` into the second slot."
+        ],
+        "code": [
+          "import java.util.List;",
+          "",
+          "public class Sorter {",
+          "    public static <T extends Comparable<T>> T max(List<T> items) {",
+          "        if (items.isEmpty()) {",
+          "            throw new IllegalArgumentException(\"List is empty\");",
+          "        }",
+          "",
+          "        T best = items.get(0);",
+          "",
+          "        for (T item : items) {",
+          "            if (item.compareTo(best) > 0) {",
+          "                best = item;",
+          "            }",
+          "        }",
+          "",
+          "        return best;",
+          "    }",
+          "",
+          "    public static <T> void swap(List<T> items, int i, int j) {",
+          "        T temp = items.get(i);",
+          "        items.set(i, items.get(j));",
+          "        items.set(j, temp);",
+          "    }",
+          "}"
+        ]
+      },
+      {
+        "title": "Streams",
+        "summary": "Two methods that process lists with streams. The first counts words by length and the second averages numbers.",
+        "points": [
+          "`stream()` starts a pipeline, and `filter(word -> !word.isBlank())` drops empty words with a lambda.",
+          "`Collectors.groupingBy(...)` groups words into `\"long\"` (more than 5 letters) or `\"short\"`, and `Collectors.counting()` counts each group.",
+          "`mapToInt(Integer::intValue)` turns the list into an `IntStream` using a method reference.",
+          "`.average()` returns an optional value, and `.orElse(0.0)` supplies a default for an empty list."
+        ],
+        "code": [
+          "import java.util.List;",
+          "import java.util.Map;",
+          "import java.util.stream.Collectors;",
+          "",
+          "public class Report {",
+          "    public static Map<String, Long> countByLength(List<String> words) {",
+          "        return words.stream()",
+          "            .filter(word -> !word.isBlank())",
+          "            .collect(Collectors.groupingBy(",
+          "                word -> word.length() > 5 ? \"long\" : \"short\",",
+          "                Collectors.counting()",
+          "            ));",
+          "    }",
+          "",
+          "    public static double average(List<Integer> numbers) {",
+          "        return numbers.stream()",
+          "            .mapToInt(Integer::intValue)",
+          "            .average()",
+          "            .orElse(0.0);",
+          "    }",
+          "}"
+        ]
+      },
+      {
+        "title": "Interface and inheritance",
+        "summary": "Shows how an interface, an abstract class and two subclasses fit together.",
+        "points": [
+          "`interface Shape` promises that every shape has an `area()` method.",
+          "`abstract class Base implements Shape` holds the shared name and `toString()`. It cannot be created directly.",
+          "`Circle` and `Square` use `extends Base`, call `super(\"Circle\")` to pass the name to the parent constructor, and implement `area()`.",
+          "`@Override` marks a method that replaces one from a parent, and `String.format(\"%.2f\", ...)` prints two decimals."
+        ],
+        "code": [
+          "interface Shape {",
+          "    double area();",
+          "}",
+          "",
+          "abstract class Base implements Shape {",
+          "    protected final String name;",
+          "",
+          "    Base(String name) {",
+          "        this.name = name;",
+          "    }",
+          "",
+          "    @Override",
+          "    public String toString() {",
+          "        return name + \" (\" + String.format(\"%.2f\", area()) + \")\";",
+          "    }",
+          "}",
+          "",
+          "class Circle extends Base {",
+          "    private final double radius;",
+          "",
+          "    Circle(double radius) {",
+          "        super(\"Circle\");",
+          "        this.radius = radius;",
+          "    }",
+          "",
+          "    @Override",
+          "    public double area() {",
+          "        return Math.PI * radius * radius;",
+          "    }",
+          "}",
+          "",
+          "class Square extends Base {",
+          "    private final double side;",
+          "",
+          "    Square(double side) {",
+          "        super(\"Square\");",
+          "        this.side = side;",
+          "    }",
+          "",
+          "    @Override",
+          "    public double area() {",
+          "        return side * side;",
+          "    }",
+          "}"
+        ]
+      },
+      {
+        "title": "Read a file safely",
+        "summary": "Two methods that read a text file, one counting its lines and one returning the first line.",
+        "points": [
+          "`throws IOException` says the method can fail with a file error, and the caller must handle it.",
+          "`try (BufferedReader reader = ...)` is try-with-resources: the reader is closed automatically at the end.",
+          "`readLine() != null` keeps reading until the end of the file, where `readLine` returns `null`.",
+          "`line == null ? \"\" : line.trim()` is a ternary expression. It returns an empty string for an empty file."
+        ],
+        "code": [
+          "import java.io.BufferedReader;",
+          "import java.io.FileReader;",
+          "import java.io.IOException;",
+          "",
+          "public class Loader {",
+          "    public static int countLines(String path) throws IOException {",
+          "        int lines = 0;",
+          "",
+          "        try (BufferedReader reader = new BufferedReader(new FileReader(path))) {",
+          "            while (reader.readLine() != null) {",
+          "                lines++;",
+          "            }",
+          "        }",
+          "",
+          "        return lines;",
+          "    }",
+          "",
+          "    public static String firstLine(String path) throws IOException {",
+          "        try (BufferedReader reader = new BufferedReader(new FileReader(path))) {",
+          "            String line = reader.readLine();",
+          "            return line == null ? \"\" : line.trim();",
+          "        }",
+          "    }",
+          "}"
+        ]
+      }
     ]
   },
   "sql": {
     "easy": [
-      [
-        "SELECT *",
-        "FROM customers;"
-      ],
-      [
-        "SELECT name, email",
-        "FROM customers",
-        "WHERE age >= 18;"
-      ],
-      [
-        "INSERT INTO users (name, email)",
-        "VALUES ('Alex', 'alex@example.com');"
-      ],
-      [
-        "UPDATE products",
-        "SET price = price * 1.1",
-        "WHERE category = 'electronics';"
-      ]
+      {
+        "title": "Select everything",
+        "summary": "Gets every column of every row from the `customers` table.",
+        "points": [
+          "`SELECT *` means \"all columns\".",
+          "`FROM customers` says which table to read.",
+          "The semicolon ends the statement."
+        ],
+        "code": [
+          "SELECT *",
+          "FROM customers;"
+        ]
+      },
+      {
+        "title": "Filter rows",
+        "summary": "Gets the name and email of customers who are 18 or older.",
+        "points": [
+          "`SELECT name, email` picks only those two columns.",
+          "`WHERE age >= 18` keeps only the rows that match the condition."
+        ],
+        "code": [
+          "SELECT name, email",
+          "FROM customers",
+          "WHERE age >= 18;"
+        ]
+      },
+      {
+        "title": "Insert a row",
+        "summary": "Adds a new row to the `users` table.",
+        "points": [
+          "`INSERT INTO users (name, email)` names the table and the columns to fill.",
+          "`VALUES (...)` gives the values in the same order as the columns.",
+          "Text values are written in single quotes."
+        ],
+        "code": [
+          "INSERT INTO users (name, email)",
+          "VALUES ('Alex', 'alex@example.com');"
+        ]
+      },
+      {
+        "title": "Update rows",
+        "summary": "Raises the price of every product in the electronics category by 10%.",
+        "points": [
+          "`UPDATE products` chooses the table to change.",
+          "`SET price = price * 1.1` calculates the new value from the old one.",
+          "`WHERE category = 'electronics'` limits the change to those rows. Without a WHERE, every row would be updated."
+        ],
+        "code": [
+          "UPDATE products",
+          "SET price = price * 1.1",
+          "WHERE category = 'electronics';"
+        ]
+      }
     ],
     "medium": [
-      [
-        "SELECT customers.name, COUNT(orders.id) AS total",
-        "FROM customers",
-        "JOIN orders",
-        "    ON orders.customer_id = customers.id",
-        "GROUP BY customers.name",
-        "ORDER BY total DESC;"
-      ],
-      [
-        "SELECT category, AVG(price) AS average_price",
-        "FROM products",
-        "GROUP BY category",
-        "HAVING AVG(price) > 100",
-        "ORDER BY average_price DESC;"
-      ],
-      [
-        "SELECT users.name, orders.total",
-        "FROM users",
-        "JOIN orders",
-        "    ON users.id = orders.user_id",
-        "WHERE orders.total > 100",
-        "ORDER BY orders.total DESC;"
-      ],
-      [
-        "SELECT department, COUNT(*) AS employees",
-        "FROM employees",
-        "GROUP BY department",
-        "ORDER BY employees DESC;"
-      ]
+      {
+        "title": "Orders per customer",
+        "summary": "Counts how many orders each customer has, with the biggest customers first.",
+        "points": [
+          "`JOIN orders ON orders.customer_id = customers.id` matches every order to its customer. A plain `JOIN` only keeps customers that have at least one order.",
+          "`COUNT(orders.id) AS total` counts the orders and names the result `total`.",
+          "`GROUP BY customers.name` creates one result row per customer.",
+          "`ORDER BY total DESC` sorts from the highest count to the lowest."
+        ],
+        "code": [
+          "SELECT customers.name, COUNT(orders.id) AS total",
+          "FROM customers",
+          "JOIN orders",
+          "    ON orders.customer_id = customers.id",
+          "GROUP BY customers.name",
+          "ORDER BY total DESC;"
+        ]
+      },
+      {
+        "title": "Average price per category",
+        "summary": "Shows the average price for each category, but only for categories that average more than 100.",
+        "points": [
+          "`AVG(price)` calculates the average, and `GROUP BY category` does it once for each category.",
+          "`HAVING` filters groups after they are calculated. `WHERE` filters rows before grouping, so it cannot use `AVG`.",
+          "`ORDER BY average_price DESC` puts the most expensive categories first."
+        ],
+        "code": [
+          "SELECT category, AVG(price) AS average_price",
+          "FROM products",
+          "GROUP BY category",
+          "HAVING AVG(price) > 100",
+          "ORDER BY average_price DESC;"
+        ]
+      },
+      {
+        "title": "Big orders with customer names",
+        "summary": "Lists the orders over 100 together with the name of the user who made each one.",
+        "points": [
+          "`JOIN orders ON users.id = orders.user_id` connects each order to its user.",
+          "`WHERE orders.total > 100` keeps only the large orders.",
+          "`ORDER BY orders.total DESC` shows the biggest first."
+        ],
+        "code": [
+          "SELECT users.name, orders.total",
+          "FROM users",
+          "JOIN orders",
+          "    ON users.id = orders.user_id",
+          "WHERE orders.total > 100",
+          "ORDER BY orders.total DESC;"
+        ]
+      },
+      {
+        "title": "Employees per department",
+        "summary": "Counts how many employees work in each department.",
+        "points": [
+          "`COUNT(*)` counts the rows in each group.",
+          "`GROUP BY department` makes one group per department.",
+          "`ORDER BY employees DESC` lists the largest departments first."
+        ],
+        "code": [
+          "SELECT department, COUNT(*) AS employees",
+          "FROM employees",
+          "GROUP BY department",
+          "ORDER BY employees DESC;"
+        ]
+      }
     ],
     "hard": [
-      [
-        "SELECT c.name, COUNT(o.id) AS orders, SUM(o.total) AS revenue",
-        "FROM customers c",
-        "LEFT JOIN orders o ON o.customer_id = c.id",
-        "WHERE o.created_at >= '2026-01-01'",
-        "GROUP BY c.name",
-        "HAVING SUM(o.total) > 500",
-        "ORDER BY revenue DESC",
-        "LIMIT 10;"
-      ],
-      [
-        "SELECT name, salary",
-        "FROM employees",
-        "WHERE salary > (",
-        "    SELECT AVG(salary)",
-        "    FROM employees",
-        "    WHERE department = 'Engineering'",
-        ")",
-        "ORDER BY salary DESC;"
-      ],
-      [
-        "SELECT name,",
-        "    CASE",
-        "        WHEN score >= 90 THEN 'A'",
-        "        WHEN score >= 75 THEN 'B'",
-        "        ELSE 'C'",
-        "    END AS grade",
-        "FROM students",
-        "WHERE active = 1",
-        "ORDER BY score DESC;"
-      ],
-      [
-        "WITH monthly AS (",
-        "    SELECT strftime('%Y-%m', created_at) AS month, SUM(total) AS revenue",
-        "    FROM orders",
-        "    GROUP BY month",
-        ")",
-        "SELECT month, revenue",
-        "FROM monthly",
-        "WHERE revenue > 1000",
-        "ORDER BY month;"
-      ]
+      {
+        "title": "Top customers by revenue",
+        "summary": "Finds the ten customers with the highest revenue since the start of 2026, and only those above 500.",
+        "points": [
+          "`LEFT JOIN` normally keeps customers with no orders, but the `WHERE` on `o.created_at` removes those rows again.",
+          "`COUNT(o.id)` counts orders and `SUM(o.total)` adds up their totals for each customer.",
+          "`HAVING SUM(o.total) > 500` filters the groups after the totals are calculated.",
+          "`ORDER BY revenue DESC` with `LIMIT 10` returns the top ten."
+        ],
+        "code": [
+          "SELECT c.name, COUNT(o.id) AS orders, SUM(o.total) AS revenue",
+          "FROM customers c",
+          "LEFT JOIN orders o ON o.customer_id = c.id",
+          "WHERE o.created_at >= '2026-01-01'",
+          "GROUP BY c.name",
+          "HAVING SUM(o.total) > 500",
+          "ORDER BY revenue DESC",
+          "LIMIT 10;"
+        ]
+      },
+      {
+        "title": "Above the Engineering average",
+        "summary": "Lists the employees who earn more than the average salary of the Engineering department.",
+        "points": [
+          "The query in parentheses is a subquery. It runs first and returns one number, the Engineering average.",
+          "The outer `WHERE salary > (...)` compares every employee's salary to that number.",
+          "`ORDER BY salary DESC` shows the highest salaries first."
+        ],
+        "code": [
+          "SELECT name, salary",
+          "FROM employees",
+          "WHERE salary > (",
+          "    SELECT AVG(salary)",
+          "    FROM employees",
+          "    WHERE department = 'Engineering'",
+          ")",
+          "ORDER BY salary DESC;"
+        ]
+      },
+      {
+        "title": "Grades with CASE",
+        "summary": "Turns a numeric score into a letter grade for every active student.",
+        "points": [
+          "`CASE WHEN ... THEN ... ELSE ... END` is SQL's version of if / else-if / else.",
+          "The conditions are checked from top to bottom, and the first one that is true wins.",
+          "`END AS grade` names the new column, and `WHERE active = 1` keeps only active students."
+        ],
+        "code": [
+          "SELECT name,",
+          "    CASE",
+          "        WHEN score >= 90 THEN 'A'",
+          "        WHEN score >= 75 THEN 'B'",
+          "        ELSE 'C'",
+          "    END AS grade",
+          "FROM students",
+          "WHERE active = 1",
+          "ORDER BY score DESC;"
+        ]
+      },
+      {
+        "title": "Monthly revenue with a CTE",
+        "summary": "Adds up the revenue for each month, then shows only the months above 1000.",
+        "points": [
+          "`WITH monthly AS (...)` defines a CTE: a temporary, named result that the query below can use.",
+          "`strftime('%Y-%m', created_at)` turns a date into a year-month text such as `2026-03`.",
+          "The inner query sums `total` per month with `GROUP BY month`.",
+          "The outer query filters with `WHERE revenue > 1000` and sorts by month."
+        ],
+        "code": [
+          "WITH monthly AS (",
+          "    SELECT strftime('%Y-%m', created_at) AS month, SUM(total) AS revenue",
+          "    FROM orders",
+          "    GROUP BY month",
+          ")",
+          "SELECT month, revenue",
+          "FROM monthly",
+          "WHERE revenue > 1000",
+          "ORDER BY month;"
+        ]
+      }
+    ],
+    "master": [
+      {
+        "title": "Top 3 earners per department",
+        "summary": "Ranks employees inside each department, then summarises the top 3 of every department.",
+        "points": [
+          "`RANK() OVER (PARTITION BY department ORDER BY salary DESC)` is a window function. It numbers rows within each department without collapsing them.",
+          "`WITH ranked AS (...), top_earners AS (...)` chains two CTEs, where the second one uses the first.",
+          "`WHERE position <= 3` keeps the top three. With `RANK`, ties can produce more than three rows.",
+          "The last query rounds the average salary and shows the highest averages first."
+        ],
+        "code": [
+          "WITH ranked AS (",
+          "    SELECT department, name, salary,",
+          "        RANK() OVER (",
+          "            PARTITION BY department",
+          "            ORDER BY salary DESC",
+          "        ) AS position",
+          "    FROM employees",
+          "),",
+          "top_earners AS (",
+          "    SELECT department, COUNT(*) AS total, AVG(salary) AS average",
+          "    FROM ranked",
+          "    WHERE position <= 3",
+          "    GROUP BY department",
+          ")",
+          "SELECT department, total, ROUND(average, 2) AS average",
+          "FROM top_earners",
+          "ORDER BY average DESC;"
+        ]
+      },
+      {
+        "title": "Customer revenue with EXISTS",
+        "summary": "Calculates the revenue of customers who ordered something since 2026-01-01, and keeps those above 100.",
+        "points": [
+          "The two `JOIN`s connect customers to orders and orders to order items.",
+          "`SUM(oi.price * oi.quantity)` is the revenue. `COUNT(DISTINCT o.id)` counts each order once even when it has several items.",
+          "`EXISTS (...)` is a correlated subquery. It refers to the outer `c.id` and is true only when a recent order exists.",
+          "`HAVING revenue > 100` uses the alias. SQLite allows this, but some databases need the full expression."
+        ],
+        "code": [
+          "SELECT c.name, COUNT(DISTINCT o.id) AS orders, ROUND(SUM(oi.price * oi.quantity), 2) AS revenue",
+          "FROM customers c",
+          "JOIN orders o ON o.customer_id = c.id",
+          "JOIN order_items oi ON oi.order_id = o.id",
+          "WHERE EXISTS (",
+          "    SELECT 1 FROM orders recent",
+          "    WHERE recent.customer_id = c.id",
+          "        AND recent.created_at >= '2026-01-01'",
+          ")",
+          "GROUP BY c.id, c.name",
+          "HAVING revenue > 100",
+          "ORDER BY revenue DESC;"
+        ]
+      },
+      {
+        "title": "Recursive CTE",
+        "summary": "Generates Fibonacci numbers below 200 with a query that refers to itself.",
+        "points": [
+          "`WITH RECURSIVE fib(a, b)` starts with the row `0, 1`.",
+          "`UNION ALL` adds the rows produced by `SELECT b, a + b FROM fib WHERE b < 200`, which repeats until the condition fails.",
+          "Each row holds two consecutive Fibonacci numbers.",
+          "The final query shows each `a` with its square, and `a % 2 = 0 AS is_even` gives 1 or 0 in SQLite. Rows are filtered with `a > 0` and sorted from the biggest."
+        ],
+        "code": [
+          "WITH RECURSIVE fib(a, b) AS (",
+          "    SELECT 0, 1",
+          "    UNION ALL",
+          "    SELECT b, a + b FROM fib WHERE b < 200",
+          ")",
+          "SELECT a AS number, a * a AS square, a % 2 = 0 AS is_even",
+          "FROM fib",
+          "WHERE a > 0",
+          "ORDER BY a DESC;"
+        ]
+      },
+      {
+        "title": "Create linked tables",
+        "summary": "Defines a `customers` table, an `orders` table linked to it, and an index.",
+        "points": [
+          "`PRIMARY KEY` gives every row a unique id, and `AUTOINCREMENT` makes it count up automatically.",
+          "`NOT NULL` forbids empty values, and `UNIQUE` forbids duplicate emails.",
+          "`CHECK (total >= 0)` rejects negative totals, and `DEFAULT CURRENT_TIMESTAMP` fills in the creation time.",
+          "`FOREIGN KEY (customer_id) REFERENCES customers (id)` links each order to a customer.",
+          "`CREATE INDEX` makes searching orders by `customer_id` faster."
+        ],
+        "code": [
+          "CREATE TABLE customers (",
+          "    id INTEGER PRIMARY KEY,",
+          "    name TEXT NOT NULL,",
+          "    email TEXT UNIQUE",
+          ");",
+          "",
+          "CREATE TABLE orders (",
+          "    id INTEGER PRIMARY KEY AUTOINCREMENT,",
+          "    customer_id INTEGER NOT NULL,",
+          "    total REAL CHECK (total >= 0),",
+          "    created_at TEXT DEFAULT CURRENT_TIMESTAMP,",
+          "    FOREIGN KEY (customer_id) REFERENCES customers (id)",
+          ");",
+          "",
+          "CREATE INDEX idx_orders_customer ON orders (customer_id);"
+        ]
+      }
     ]
   }
 }

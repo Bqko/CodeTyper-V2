@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Browse every CodeType snippet in JavaScript, Python, Java and SQL, with the code and an explanation of how it works.">
+<title>Snippets — CodeType</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="page-wide">
+
+  <!-- ==================== HEADER / NAVIGATION ==================== -->
+  <header>
+    <nav>
+      <a class="logo" href="index.html">CodeType</a>
+
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="practice.html">Practice</a>
+        <a href="snippets.html" aria-current="page">Snippets</a>
+        <button id="theme-toggle" class="btn-secondary">Dark Mode</button>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- ==================== INTRO ==================== -->
+    <section class="library-intro">
+      <h1>Snippet library</h1>
+      <p>
+        Every snippet in CodeType in one place. Pick one to read the code
+        and an explanation of how it works.
+      </p>
+    </section>
+
+
+    <!-- ==================== LIBRARY ==================== -->
+    <section class="library">
+
+      <!-- Left: filters and the lists of snippets -->
+      <div class="library-side">
+        <!-- The filter buttons are created by JavaScript -->
+        <div class="filters">
+          <div class="filter-row" id="language-filters" role="group" aria-label="Language"></div>
+          <div class="filter-row" id="difficulty-filters" role="group" aria-label="Difficulty"></div>
+        </div>
+
+        <p class="library-count" id="library-count" aria-live="polite"></p>
+
+        <!-- One list per language (created by JavaScript) -->
+        <div class="snippet-lists" id="snippet-lists"></div>
+      </div>
+
+      <!-- Right: the selected snippet -->
+      <article class="snippet-detail" id="snippet-detail" aria-live="polite">
+        <p class="detail-empty">Loading snippets…</p>
+      </article>
+
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer>
+    <p>&copy; 2026 CodeType. All rights reserved.</p>
+  </footer>
+
+  <script src="theme.js"></script>
+  <script src="highlight.js"></script>
+  <script src="snippet-tools.js"></script>
+  <script>
+    /* ==========================================================
+       REQUIRED FILES
+       This page needs highlight.js and snippet-tools.js. They must sit
+       in the same folder as snippets.html. If one is missing, say so clearly
+       instead of showing an empty page.
+       ========================================================== */
+
+    const missingFiles = [];
+
+    if (typeof tokenize === 'undefined') missingFiles.push('highlight.js');
+    if (typeof fetchSnippetLibrary === 'undefined') missingFiles.push('snippet-tools.js');
+
+    if (missingFiles.length > 0) {
+      const message =
+        'Missing file: ' + missingFiles.join(' and ') + '. Put ' +
+        (missingFiles.length > 1 ? 'them' : 'it') +
+        ' in the same folder as snippets.html and refresh the page.';
+
+      document.getElementById('snippet-detail').textContent = message;
+      throw new Error(message);   // stops the rest of the script
+    }
+
+
+    /* ==========================================================
+       SNIPPETS PAGE
+       Shows every snippet from snippets.json as lists (one per
+       language). Clicking a snippet shows its code, with syntax
+       colours, and its explanation.
+
+       Shared code: highlight.js (tokenize) and snippet-tools.js
+       (loading snippets.json and the text helpers).
+       ========================================================== */
+
+    const $ = (id) => document.getElementById(id);
+
+
+    /* ==========================================================
+       1. STATE
+       ========================================================== */
+
+    // Every snippet in one flat list. Each item is:
+    // { id, language, difficulty, snippet }  (id looks like "python-hard-2")
+    let allItems = [];
+
+    let languageFilter = 'all';
+    let difficultyFilter = 'all';
+    let selectedId = null;   // the snippet that should be open
+    let shownId = null;      // the snippet that is actually drawn on the right
+
+
+    /* ==========================================================
+       2. BUILDING THE LIST OF ALL SNIPPETS
+       ========================================================== */
+
+    /* Turns the loaded library into one flat list, ordered by language
+       (same order as the Practice page), then difficulty, then position. */
+    function buildItems(library) {
+      const items = [];
+
+      Object.keys(LANGUAGE_NAMES).forEach((language) => {
+        if (!library[language]) return;
+
+        DIFFICULTIES.forEach((difficulty) => {
+          (library[language][difficulty.id] || []).forEach((snippet, index) => {
+            items.push({
+              id: language + '-' + difficulty.id + '-' + index,
+              language: language,
+              difficulty: difficulty.id,
+              snippet: snippet
+            });
+          });
+        });
+      });
+
+      return items;
+    }
+
+
+    /* Title shown in the list. Snippets without a title show their first line. */
+    function snippetTitle(snippet) {
+      return snippet.title || snippet.code.split('\n')[0];
+    }
+
+
+    /* The snippets that match the current filters. */
+    function visibleItems() {
+      return allItems.filter((item) =>
+        (languageFilter === 'all' || item.language === languageFilter) &&
+        (difficultyFilter === 'all' || item.difficulty === difficultyFilter)
+      );
+    }
+
+
+    /* ==========================================================
+       3. FILTER BUTTONS
+       ========================================================== */
+
+    /* Creates a row of buttons: "All" plus one for each option.
+       Pressing one selects it and updates the page. */
+    function buildFilterRow(container, label, options, onPick) {
+      container.innerHTML = '';
+      container.appendChild(makeElement('span', 'filter-label', label));
+
+      [{ id: 'all', label: 'All' }, ...options].forEach((option) => {
+        const button = makeElement('button', 'chip', option.label);
+
+        button.type = 'button';
+        button.dataset.value = option.id;
+        button.setAttribute('aria-pressed', option.id === 'all' ? 'true' : 'false');
+
+        button.addEventListener('click', () => {
+          onPick(option.id);
+
+          // Only the chosen button in this row is "pressed".
+          container.querySelectorAll('.chip').forEach((chip) => {
+            chip.setAttribute(
+              'aria-pressed',
+              String(chip.dataset.value === option.id)
+            );
+          });
+        });
+
+        container.appendChild(button);
+      });
+    }
+
+
+    function buildFilters() {
+      buildFilterRow(
+        $('language-filters'),
+        'Language',
+        Object.keys(LANGUAGE_NAMES).map(id => ({ id, label: LANGUAGE_NAMES[id] })),
+        (value) => { languageFilter = value; renderList(); }
+      );
+
+      buildFilterRow(
+        $('difficulty-filters'),
+        'Difficulty',
+        DIFFICULTIES,
+        (value) => { difficultyFilter = value; renderList(); }
+      );
+    }
+
+
+    /* ==========================================================
+       4. THE LISTS (left side)
+       ========================================================== */
+
+    /* Draws the lists for the current filters. If the selected snippet
+       is no longer in them, the first visible snippet is selected. */
+    function renderList() {
+      const items = visibleItems();
+      const container = $('snippet-lists');
+
+      container.innerHTML = '';
+
+      $('library-count').textContent =
+        items.length === 1 ? '1 snippet' : items.length + ' snippets';
+
+      // One group (heading + list) per language.
+      Object.keys(LANGUAGE_NAMES).forEach((language) => {
+        const group = items.filter(item => item.language === language);
+
+        if (group.length === 0) return;
+
+        const section = makeElement('section', 'list-group');
+        const title = makeElement('h2', 'list-group-title', LANGUAGE_NAMES[language]);
+        const list = makeElement('ul', 'snippet-list');
+
+        title.appendChild(makeElement('span', 'list-group-count', String(group.length)));
+
+        group.forEach((item) => {
+          const row = document.createElement('li');
+          const button = makeElement('button', 'snippet-item');
+
+          button.type = 'button';
+          button.dataset.id = item.id;
+          button.appendChild(makeElement('span', 'snippet-item-title', snippetTitle(item.snippet)));
+          button.appendChild(difficultyBadge(item.difficulty));
+          button.addEventListener('click', () => selectSnippet(item.id, true));
+
+          row.appendChild(button);
+          list.appendChild(row);
+        });
+
+        section.append(title, list);
+        container.appendChild(section);
+      });
+
+      // Keep the selection if it is still visible, otherwise pick the first.
+      const current = items.find(item => item.id === selectedId);
+
+      if (current) {
+        markSelected();
+
+        // (On first load the snippet from the address is not drawn yet.)
+        if (shownId !== selectedId) renderDetail(current);
+      } else if (items.length > 0) {
+        selectSnippet(items[0].id, false);
+      } else {
+        selectedId = null;
+        showEmptyMessage('No snippets match these filters.');
+      }
+    }
+
+
+    /* Small coloured label such as "Hard". */
+    function difficultyBadge(difficulty) {
+      return makeElement('span', 'badge badge-' + difficulty, difficultyLabel(difficulty));
+    }
+
+
+    /* Highlights the selected snippet in the list. */
+    function markSelected() {
+      $('snippet-lists').querySelectorAll('.snippet-item').forEach((button) => {
+        const selected = button.dataset.id === selectedId;
+
+        button.classList.toggle('active', selected);
+
+        if (selected) {
+          button.setAttribute('aria-current', 'true');
+        } else {
+          button.removeAttribute('aria-current');
+        }
+      });
+    }
+
+
+    /* ==========================================================
+       5. SHOWING ONE SNIPPET (right side)
+       ========================================================== */
+
+    /* Selects a snippet: highlights it, shows it, and remembers it in the
+       address (#python-hard-2) so the link can be shared or bookmarked.
+       scrollToIt is true when the user clicked it. */
+    function selectSnippet(id, scrollToIt) {
+      const item = allItems.find(entry => entry.id === id);
+
+      if (!item) return;
+
+      selectedId = id;
+      markSelected();
+      renderDetail(item);
+
+      history.replaceState(null, '', '#' + id);
+
+      // On a narrow screen the details are below the list, so scroll to them.
+      const narrow = window.matchMedia && window.matchMedia('(max-width: 720px)').matches;
+      const detail = $('snippet-detail');
+
+      if (scrollToIt && narrow && detail.scrollIntoView) {
+        detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+
+    function showEmptyMessage(text) {
+      shownId = null;
+      $('snippet-detail').innerHTML = '';
+      $('snippet-detail').appendChild(makeElement('p', 'detail-empty', text));
+    }
+
+
+    /* Draws the code with line numbers and syntax colours.
+       tokenize() (highlight.js) gives a token type for every character;
+       neighbouring characters with the same type share one <span>. */
+    function renderCode(container, code, language) {
+      const types = tokenize(code, language);
+
+      container.innerHTML = '';
+
+      let line = makeElement('div', 'code-line');
+      let run = '';
+      let runType = null;
+
+      // Writes the characters collected so far as one coloured <span>.
+      function flush() {
+        if (!run) return;
+
+        const span = document.createElement('span');
+
+        span.textContent = run;
+        if (runType) span.dataset.t = runType;
+
+        line.appendChild(span);
+        run = '';
+      }
+
+      container.appendChild(line);
+
+      for (let i = 0; i < code.length; i++) {
+        if (code[i] === '\n') {
+          // New line: finish this one and start the next.
+          flush();
+          line = makeElement('div', 'code-line');
+          container.appendChild(line);
+          continue;
+        }
+
+        // A different token type starts a new <span>.
+        if (run && types[i] !== runType) flush();
+        if (!run) runType = types[i];
+
+        run += code[i];
+      }
+
+      flush();
+    }
+
+
+    /* The "Copy code" button. */
+    function makeCopyButton(code) {
+      const button = makeElement('button', 'btn-secondary copy-btn', 'Copy code');
+
+      button.type = 'button';
+
+      button.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(code);
+          button.textContent = 'Copied!';
+        } catch (error) {
+          button.textContent = 'Could not copy';
+        }
+
+        setTimeout(() => { button.textContent = 'Copy code'; }, 1600);
+      });
+
+      return button;
+    }
+
+
+    /* Fills the right side with the selected snippet. */
+    function renderDetail(item) {
+      shownId = item.id;
+
+      const snippet = item.snippet;
+      const detail = $('snippet-detail');
+      const lineCount = snippet.code.split('\n').length;
+
+      detail.innerHTML = '';
+
+      // Title, language and difficulty.
+      const head = makeElement('div', 'detail-head');
+      const meta = makeElement('div', 'detail-meta');
+
+      meta.append(
+        makeElement('span', 'badge badge-lang', LANGUAGE_NAMES[item.language]),
+        difficultyBadge(item.difficulty)
+      );
+
+      head.append(makeElement('h2', 'detail-title', snippetTitle(snippet)), meta);
+
+      // The code, in a box with a small bar on top.
+      const codeBox = makeElement('div', 'code-box');
+      const bar = makeElement('div', 'code-box-bar');
+      const codeView = makeElement('div', 'code-view');
+
+      codeView.setAttribute('role', 'region');
+      codeView.setAttribute('aria-label', 'Code');
+      renderCode(codeView, snippet.code, item.language);
+
+      bar.append(
+        makeElement('span', '', lineCount + (lineCount === 1 ? ' line' : ' lines')),
+        makeCopyButton(snippet.code)
+      );
+      codeBox.append(bar, codeView);
+
+      detail.append(head, codeBox);
+
+      // The explanation (snippets without one just show the code).
+      if (snippet.summary) {
+        const summary = makeElement('p', 'detail-summary');
+
+        addFormattedText(summary, snippet.summary);
+        detail.append(makeElement('h3', 'detail-kicker', 'What it does'), summary);
+      }
+
+      if (snippet.points && snippet.points.length > 0) {
+        const list = makeElement('ul', 'detail-points');
+
+        snippet.points.forEach((point) => {
+          const row = document.createElement('li');
+
+          addFormattedText(row, point);
+          list.appendChild(row);
+        });
+
+        detail.append(makeElement('h3', 'detail-kicker', 'How it works'), list);
+      }
+    }
+
+
+    /* ==========================================================
+       6. START
+       Load snippets.json, build the page, and open the snippet
+       from the address (#python-hard-2) if there is one.
+       ========================================================== */
+
+    fetchSnippetLibrary()
+      .then((library) => {
+        allItems = buildItems(library);
+
+        // A snippet named in the address is selected first.
+        const wanted = location.hash.slice(1);
+
+        if (allItems.some(item => item.id === wanted)) {
+          selectedId = wanted;
+        }
+
+        buildFilters();
+        renderList();
+
+        // Make sure the snippet from the address is visible in the list.
+        const active = document.querySelector('.snippet-item.active');
+
+        if (wanted && active && active.scrollIntoView) {
+          active.scrollIntoView({ block: 'nearest' });
+        }
+      })
+      .catch((error) => {
+        console.error('Could not load snippets.json:', error);
+
+        showEmptyMessage(
+          'Could not load snippets.json. If you opened this file by ' +
+          'double-clicking it, run the site from a local server instead ' +
+          '(for example the "Live Server" extension in VS Code).'
+        );
+      });
+  </script>
+</body>
+</html>
