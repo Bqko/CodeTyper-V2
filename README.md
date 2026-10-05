@@ -1,4 +1,4 @@
-# CodeType
+# CodeTyper V2
 
 CodeType is a browser-based coding and typing practice app built primarily for
 beginners. Its goal is to help learners explore coding basics, understand what
