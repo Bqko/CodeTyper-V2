@@ -18,6 +18,9 @@
   --clay: #8A6E52;
   --error: #C0392B;
 
+  /* Text colour on top of the accent colour (primary buttons, selected chips). */
+  --on-stamp: #FFFFFF;
+
   /* Syntax colours for code that has not been typed yet. */
   --tok-kw:  #8250A8;
   --tok-str: #A0622D;
@@ -54,6 +57,7 @@
   --stamp-dark: #8FD3A6;
   --clay: #A0A3A8;
   --error: #E0665A;
+  --on-stamp: #17181A;
 
   --tok-kw:  #C39BE0;
   --tok-str: #E0A878;
@@ -63,6 +67,152 @@
   --tok-cls: #7FB4E6;
 
   --gold: #F5C84C;
+}
+
+
+/* ==========================================================
+   2B. SKINS
+   A skin is a complete colour set. JavaScript (appearance.js)
+   puts data-skin="..." on <html>. "Classic" has no skin, so it
+   uses the light colours above or the dark mode colours.
+   Every skin sets every colour, so it fully replaces the mode.
+   ========================================================== */
+
+[data-skin="midnight"] {
+  --paper: #0A1428;
+  --surface: #101C36;
+  --ink: #E8EEF9;
+  --ink-soft: #94A7C8;
+  --rule: #233255;
+  --stamp: #4CC2FF;
+  --stamp-dark: #8AD8FF;
+  --clay: #8FA3C7;
+  --error: #FF6B6B;
+  --on-stamp: #06142A;
+
+  --tok-kw:  #B79CFF;
+  --tok-str: #FFB86B;
+  --tok-num: #59E0D0;
+  --tok-com: #7688AD;
+  --tok-fn:  #7FD6FF;
+  --tok-cls: #8FB4FF;
+
+  --gold: #F5C84C;
+}
+
+
+[data-skin="paper"] {
+  --paper: #F4EEDF;
+  --surface: #FFFBF2;
+  --ink: #2B2418;
+  --ink-soft: #6B5F4A;
+  --rule: #D9CDB4;
+  --stamp: #9A5B2E;
+  --stamp-dark: #7A4520;
+  --clay: #8A6E52;
+  --error: #B3361F;
+  --on-stamp: #FFFFFF;
+
+  --tok-kw:  #7A3E9D;
+  --tok-str: #A0522D;
+  --tok-num: #1E7F74;
+  --tok-com: #7B715A;
+  --tok-fn:  #3F6D4E;
+  --tok-cls: #2F5F8F;
+
+  --gold: #B07A10;
+}
+
+
+[data-skin="terminal"] {
+  --paper: #050805;
+  --surface: #0B120B;
+  --ink: #C8F7C8;
+  --ink-soft: #6FA56F;
+  --rule: #1C3A1C;
+  --stamp: #3DFF7A;
+  --stamp-dark: #7DFFA6;
+  --clay: #6FA56F;
+  --error: #FF5C5C;
+  --on-stamp: #031003;
+
+  --tok-kw:  #B8FF6B;
+  --tok-str: #FFD166;
+  --tok-num: #6BFFE0;
+  --tok-com: #538D53;
+  --tok-fn:  #3DFF7A;
+  --tok-cls: #9BFFB4;
+
+  --gold: #E6D45A;
+}
+
+
+[data-skin="sunset"] {
+  --paper: #1A0F1F;
+  --surface: #251528;
+  --ink: #FBEFE6;
+  --ink-soft: #C7A9B8;
+  --rule: #46284B;
+  --stamp: #FF7A59;
+  --stamp-dark: #FF9C80;
+  --clay: #D9A5B3;
+  --error: #FF5470;
+  --on-stamp: #2A0E16;
+
+  --tok-kw:  #FF8FB1;
+  --tok-str: #FFC46B;
+  --tok-num: #8FE3C8;
+  --tok-com: #9B7A9F;
+  --tok-fn:  #FF9B73;
+  --tok-cls: #C89BFF;
+
+  --gold: #FFC857;
+}
+
+
+[data-skin="neon"] {
+  --paper: #07060F;
+  --surface: #0F0B1E;
+  --ink: #F2EEFF;
+  --ink-soft: #A59ACB;
+  --rule: #2A1F4D;
+  --stamp: #FF3DCB;
+  --stamp-dark: #FF7DDD;
+  --clay: #A59ACB;
+  --error: #FF5C7A;
+  --on-stamp: #12041A;
+
+  --tok-kw:  #FF3DCB;
+  --tok-str: #FFE14D;
+  --tok-num: #3DF5FF;
+  --tok-com: #7F74AE;
+  --tok-fn:  #3DF5FF;
+  --tok-cls: #A78BFF;
+
+  --gold: #FFE14D;
+}
+
+
+[data-skin="royal"] {
+  --paper: #120B24;
+  --surface: #1B1236;
+  --ink: #F3EDFF;
+  --ink-soft: #B7A8DE;
+  --rule: #35265F;
+  --stamp: #E6B84A;
+  --stamp-dark: #F2CF7A;
+  --clay: #B7A8DE;
+  --error: #FF6B8A;
+  --on-stamp: #1A1230;
+
+  --tok-kw:  #C9A6FF;
+  --tok-str: #F2CF7A;
+  --tok-num: #7FE0D0;
+  --tok-com: #897BB4;
+  --tok-fn:  #9FE3FF;
+  --tok-cls: #D9B8FF;
+
+  --gold: #F2CF7A;
 }
 
 
@@ -128,13 +278,7 @@ select:focus-visible {
 /* Primary button: green filled button. */
 .btn-primary {
   background: var(--stamp);
-  color: #fff;
-}
-
-
-/* Dark mode: the green is light, so use dark text on it. */
-[data-theme="dark"] .btn-primary {
-  color: #17181A;
+  color: var(--on-stamp);
 }
 
 
@@ -349,9 +493,10 @@ nav {
   border-radius: 6px;
   background: var(--surface);
 
-  /* Code uses a monospace font. */
-  font-family: var(--mono);
-  font-size: 1.05rem;
+  /* Code uses a monospace font. The player can choose another font and
+     size on the Customize page (appearance.js sets these variables). */
+  font-family: var(--code-font, var(--mono));
+  font-size: calc(1.05rem * var(--code-scale, 1) * var(--font-scale, 1));
   line-height: 1.7;
 
 
@@ -428,6 +573,18 @@ nav {
 }
 
 
+/* Shows the Enter marker only when that newline was typed incorrectly. */
+.code-display .enter-marker {
+  font-size: 0.7em;
+  opacity: 0.65;
+  visibility: hidden;
+}
+
+.code-display span.incorrect .enter-marker {
+  visibility: visible;
+}
+
+
 /* ==========================================================
    13. TYPING CARET
    Creates the vertical line showing where the next
@@ -442,7 +599,7 @@ nav {
 
   height: 1.25em;
 
-  border-left: 3px solid var(--stamp);
+  border-left: 3px solid var(--caret-color, var(--stamp));
 
   margin-left: -1px;
   vertical-align: text-bottom;
@@ -462,6 +619,57 @@ nav {
   0%   { opacity: 1; }
   50%  { opacity: 0; }
 }
+
+/* Other caret shapes (chosen on the Customize page: data-caret on <html>).
+   They are one character wide (1ch) but take no space (negative margin),
+   so they sit on top of the next character without moving the text. */
+[data-caret="underline"] .typing-caret {
+  width: 1ch;
+  height: 0;
+  margin-left: 0;
+  margin-right: -1ch;
+
+  border-left: none;
+  border-bottom: 3px solid var(--caret-color, var(--stamp));
+  vertical-align: -0.25em;
+}
+
+
+[data-caret="block"] .typing-caret {
+  width: 1ch;
+  margin-left: 0;
+  margin-right: -1ch;
+
+  border-left: none;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--caret-color, var(--stamp)) 45%, transparent);
+}
+
+
+/* How typed letters look (chosen on the Customize page: data-letters). */
+[data-letters="bold"] .code-display span.correct {
+  font-weight: 700;
+}
+
+
+[data-letters="glow"] .code-display span.correct {
+  text-shadow: 0 0 8px color-mix(in srgb, var(--stamp) 70%, transparent);
+}
+
+
+/* "Focus": typed letters fade, so your eyes stay on what comes next. */
+[data-letters="fade"] .code-display span.correct {
+  opacity: 0.4;
+}
+
+
+[data-letters="neon"] .code-display span.correct {
+  color: var(--tok-num);
+  text-shadow:
+    0 0 6px var(--tok-num),
+    0 0 16px color-mix(in srgb, var(--tok-num) 60%, transparent);
+}
+
 
 
 /* ==========================================================
@@ -1295,7 +1503,7 @@ nav {
   --accent: var(--gold);
 
   position: absolute;
-  top: 1rem;
+  top: calc(1rem + var(--stack, 0) * 5.4rem);
   left: 50%;
 
   display: flex;
@@ -1411,6 +1619,7 @@ nav {
 .achievement[data-tier="good"]    { --accent: var(--stamp); }
 .achievement[data-tier="great"]   { --accent: var(--tok-cls); }
 .achievement[data-tier="master"]  { --accent: var(--gold); }
+.achievement[data-tier="levelup"] { --accent: var(--tok-num); }
 
 
 /* ==========================================================
@@ -1751,13 +1960,7 @@ nav {
 .chip[aria-pressed="true"] {
   border-color: var(--stamp);
   background: var(--stamp);
-  color: #fff;
-}
-
-
-/* Dark mode: the green is light, so use dark text on it. */
-[data-theme="dark"] .chip[aria-pressed="true"] {
-  color: #17181A;
+  color: var(--on-stamp);
 }
 
 
@@ -1941,8 +2144,8 @@ nav {
 
   background: var(--surface);
 
-  font-family: var(--mono);
-  font-size: 0.95rem;
+  font-family: var(--code-font, var(--mono));
+  font-size: calc(0.95rem * var(--code-scale, 1) * var(--font-scale, 1));
   line-height: 1.7;
 
   /* Counter used to number the lines. */
@@ -2031,6 +2234,837 @@ nav {
   font-size: 0.88em;
   color: var(--ink);
   overflow-wrap: anywhere;
+}
+
+
+/* ==========================================================
+   15H. PROFILE BADGE, XP RESULT AND TOASTS
+   (progress.js builds the badge and the toasts; the XP block is in
+   the results panel of practice.html.)
+   ========================================================== */
+
+/* ---------- Header badge: avatar + level + thin XP bar ---------- */
+
+.nav-links a.profile-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  padding: 0.2rem 0.7rem 0.2rem 0.25rem;
+
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  color: var(--ink);
+}
+
+
+.nav-links a.profile-badge:hover {
+  border-color: var(--ink-soft);
+}
+
+
+/* On the profile page the badge shows it is the current page. */
+.nav-links a.profile-badge[aria-current="page"] {
+  padding-bottom: 0.2rem;
+  border: 1px solid var(--stamp);
+}
+
+
+.profile-badge-img {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+
+.profile-badge-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 3.2rem;
+}
+
+
+.profile-badge-level {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+
+.profile-badge-bar {
+  display: block;
+  height: 3px;
+
+  border-radius: 999px;
+  background: var(--rule);
+  overflow: hidden;
+}
+
+
+.profile-badge-bar i {
+  display: block;
+  height: 100%;
+
+  background: var(--tok-num);
+  transition: width 0.4s ease;
+}
+
+
+/* A ring spreads out of the badge when the level goes up. */
+.profile-badge.pulse {
+  animation: badge-pulse 0.9s ease-out;
+}
+
+
+@keyframes badge-pulse {
+  from {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--tok-num) 60%, transparent);
+  }
+
+  to {
+    box-shadow: 0 0 0 14px transparent;
+  }
+}
+
+
+/* ---------- XP block in the results panel ---------- */
+
+.result-xp {
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+
+  width: 100%;
+  flex: none;
+
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+
+  /* Appears right after the rank (--reveal is set by JavaScript). */
+  animation: rank-fade-up 0.5s ease-out calc(var(--reveal, 0.9s) + 0.4s) backwards;
+}
+
+
+/* "+264 XP" */
+.xp-gain {
+  display: flex;
+  align-items: baseline;
+  flex: none;
+
+  font-family: var(--serif);
+  font-weight: 600;
+  color: var(--tok-num);
+}
+
+
+.xp-gain-plus {
+  font-size: 1.6rem;
+}
+
+
+.xp-gain-number {
+  font-size: 2.6rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+
+.xp-gain-unit {
+  margin-left: 0.4rem;
+  font-family: var(--mono);
+  font-size: 1rem;
+}
+
+
+/* The level text and the bar (also used on the profile page). */
+.xp-meter {
+  flex: 1;
+  min-width: 0;
+}
+
+
+.xp-meter-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+
+.xp-meter-labels span:first-child {
+  font-weight: 500;
+  color: var(--ink);
+}
+
+
+.xp-bar {
+  height: 10px;
+
+  border-radius: 999px;
+  background: var(--rule);
+  overflow: hidden;
+}
+
+
+.xp-bar-fill {
+  width: 0;
+  height: 100%;
+
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--stamp), var(--tok-num));
+
+  /* The bar grows smoothly (JavaScript changes its width). */
+  transition: width 0.8s ease-out;
+}
+
+
+/* Line under the bar: where the XP came from. */
+.xp-breakdown {
+  margin: 0.55rem 0 0;
+
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+
+/* The bar flashes when the level goes up. */
+.result-xp.level-up .xp-bar {
+  animation: xp-level-flash 1s ease-out;
+}
+
+
+@keyframes xp-level-flash {
+  from {
+    filter: brightness(2);
+    box-shadow: 0 0 18px color-mix(in srgb, var(--tok-num) 70%, transparent);
+  }
+
+  to {
+    filter: none;
+    box-shadow: none;
+  }
+}
+
+
+/* ---------- Toasts: short messages at the bottom of the screen ---------- */
+
+.toast-stack {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  z-index: 1100;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+
+  width: max-content;
+  max-width: calc(100vw - 2rem);
+  transform: translateX(-50%);
+
+  /* Never blocks clicks on the page underneath. */
+  pointer-events: none;
+}
+
+
+.xp-toast {
+  padding: 0.6rem 1.1rem;
+
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  color: var(--ink);
+
+  font-size: 0.9rem;
+
+  animation:
+    toast-in 0.3s ease-out,
+    toast-out 0.4s ease-in 2.8s forwards;
+}
+
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+
+@keyframes toast-out {
+  to {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+
+/* ==========================================================
+   15I. PROFILE PAGE (profile.html)
+   ========================================================== */
+
+.profile-top {
+  padding-top: 3rem;
+  padding-bottom: 1rem;
+}
+
+
+/* Avatar on the left, name / level / XP bar on the right. */
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+
+  padding: 2rem;
+
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+
+.profile-avatar {
+  flex: none;
+  width: 160px;
+  height: 160px;
+
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--tok-num) 25%, transparent);
+}
+
+
+.profile-info {
+  flex: 1;
+  min-width: 0;
+}
+
+
+.profile-label {
+  display: block;
+  margin-bottom: 0.25rem;
+
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+
+/* The name looks like a heading, but it is a text box you can edit. */
+.profile-name-input {
+  width: 100%;
+  max-width: 22rem;
+  margin-left: -0.6rem;
+  padding: 0.3rem 0.6rem;
+
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+
+  font-family: var(--serif);
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+
+.profile-name-input:hover {
+  border-color: var(--rule);
+}
+
+
+.profile-name-input:focus {
+  border-color: var(--stamp);
+  outline: none;
+}
+
+
+.profile-level {
+  margin: 0.25rem 0 1rem;
+
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--tok-num);
+}
+
+
+.profile-total {
+  margin: 0.6rem 0 0;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+
+/* Statistics cards. */
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 1rem;
+
+  margin-top: 1.25rem;
+}
+
+
+.stat-card {
+  padding: 1.1rem 1.25rem;
+
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+
+.stat-card-value {
+  font-family: var(--serif);
+  font-size: 1.8rem;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+
+.stat-card-label {
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+
+/* "How XP works" */
+.plain-list {
+  max-width: 70ch;
+  margin: 1.25rem 0 0;
+  padding-left: 1.25rem;
+}
+
+
+.plain-list li {
+  margin-bottom: 0.5rem;
+}
+
+
+/* Level titles. Levels you have not reached are faded. */
+.ladder {
+  display: grid;
+  gap: 0.4rem;
+
+  max-width: 520px;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+
+.ladder-row {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr auto;
+  align-items: center;
+  gap: 1rem;
+
+  padding: 0.55rem 0.9rem;
+
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--surface);
+  opacity: 0.5;
+}
+
+
+.ladder-row.reached {
+  opacity: 1;
+}
+
+
+.ladder-row.current {
+  border-color: var(--stamp);
+  background: color-mix(in srgb, var(--stamp) 12%, var(--surface));
+}
+
+
+.ladder-level,
+.ladder-xp {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+
+
+.ladder-title {
+  font-weight: 500;
+}
+
+
+/* Backup code. */
+.backup {
+  max-width: 640px;
+}
+
+
+.backup-code {
+  width: 100%;
+  padding: 0.75rem;
+
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink);
+
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  resize: vertical;
+}
+
+
+.backup-code:focus {
+  border-color: var(--stamp);
+  outline: none;
+}
+
+
+.backup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+
+  margin-top: 0.75rem;
+}
+
+
+.backup-message {
+  min-height: 1.4em;
+  margin: 0.75rem 0 0;
+
+  font-size: 0.9rem;
+  color: var(--stamp);
+}
+
+
+.backup-message.error {
+  color: var(--error);
+}
+
+
+/* ==========================================================
+   15J. CUSTOMIZE PAGE (customize.html)
+   Preview on the left, all the choices on the right.
+   ========================================================== */
+
+.customize-intro {
+  padding-top: 3rem;
+  padding-bottom: 1.5rem;
+}
+
+
+.customize-intro h1 {
+  font-size: clamp(2rem, 4.5vw, 2.8rem);
+  line-height: 1.1;
+}
+
+
+.customize-intro p {
+  max-width: 56ch;
+  margin: 0.75rem 0 0;
+  color: var(--ink-soft);
+}
+
+
+.customize {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  gap: 2rem;
+  align-items: start;
+
+  padding-bottom: 4rem;
+}
+
+
+/* The left column stays in view while you scroll the choices. */
+.customize-side {
+  position: sticky;
+  top: 1rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+
+.preview-card {
+  padding: 1.25rem;
+
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--surface);
+  text-align: center;
+}
+
+
+.preview-avatar {
+  width: 140px;
+  height: 140px;
+
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--tok-num) 25%, transparent);
+}
+
+
+.preview-level {
+  margin: 0.9rem 0 0.25rem;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--tok-num);
+}
+
+
+.preview-note {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+
+.preview-title {
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+}
+
+
+/* The typing preview is a smaller version of the real typing box. */
+.preview-code {
+  min-height: 0;
+  padding: 1rem 1.1rem;
+  text-align: left;
+}
+
+
+.reset-button {
+  align-self: stretch;
+}
+
+
+/* ---------- The choices ---------- */
+
+.option-section {
+  margin-bottom: 2.5rem;
+}
+
+
+.option-section-title {
+  font-size: 1.6rem;
+}
+
+
+.option-section-note {
+  max-width: 62ch;
+  margin: 0.4rem 0 1rem;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+
+
+.option-group-title {
+  margin: 1.25rem 0 0.6rem;
+
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--stamp);
+}
+
+
+.option-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+  gap: 0.75rem;
+}
+
+
+/* One choice: a picture of it, its name, and a lock or NEW label. */
+.option {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+
+  padding: 0.85rem 0.5rem 0.75rem;
+
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+
+.option:hover:not(:disabled) {
+  border-color: var(--ink-soft);
+}
+
+
+.option.selected {
+  border-color: var(--stamp);
+  background: color-mix(in srgb, var(--stamp) 14%, var(--surface));
+  box-shadow: 0 0 0 1px var(--stamp);
+}
+
+
+/* Locked: faded and not clickable. */
+.option.locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+.option-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 48px;
+  max-width: 100%;
+
+  font-family: var(--mono);
+  line-height: 1;
+}
+
+
+.option-preview img {
+  border-radius: 50%;
+}
+
+
+.option-name {
+  font-weight: 500;
+}
+
+
+.option-lock {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--ink-soft);
+}
+
+
+.option-new {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+
+  padding: 0.05rem 0.4rem;
+
+  border-radius: 999px;
+  background: var(--stamp);
+  color: var(--on-stamp);
+
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+}
+
+
+/* Skin preview: three colour stripes in a rounded box. */
+.option-preview.swatches {
+  width: 72px;
+  height: 40px;
+
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+
+.option-preview.swatches i {
+  flex: 1;
+  align-self: stretch;
+}
+
+
+/* Caret colour preview. */
+.color-dot {
+  display: block;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+}
+
+
+/* Typed-letter preview ("code" in each style). */
+.sample-letters {
+  font-size: 1.1rem;
+}
+
+.sample-letters[data-style="bold"] { font-weight: 700; }
+
+.sample-letters[data-style="glow"] {
+  text-shadow: 0 0 8px color-mix(in srgb, var(--stamp) 70%, transparent);
+}
+
+.sample-letters[data-style="fade"] { opacity: 0.4; }
+
+.sample-letters[data-style="neon"] {
+  color: var(--tok-num);
+  text-shadow:
+    0 0 6px var(--tok-num),
+    0 0 16px color-mix(in srgb, var(--tok-num) 60%, transparent);
+}
+
+
+/* Caret-shape preview: "a|b" with the caret drawn in that shape. */
+.sample-caret {
+  font-size: 1.3rem;
+}
+
+.sample-caret i {
+  display: inline-block;
+  width: 0;
+  height: 1.2em;
+
+  border-left: 3px solid var(--stamp);
+  vertical-align: text-bottom;
+}
+
+.sample-caret[data-style="underline"] i {
+  width: 0.6em;
+  height: 0;
+
+  border-left: none;
+  border-bottom: 3px solid var(--stamp);
+  vertical-align: -0.25em;
+}
+
+.sample-caret[data-style="block"] i {
+  width: 0.6em;
+
+  border-left: none;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--stamp) 45%, transparent);
+}
+
+
+/* Profile page: the Customize button and spacing. */
+.profile-customize {
+  margin-top: 1rem;
 }
 
 
@@ -2345,6 +3379,40 @@ a.btn {
 
 @media (max-width: 720px) {
 
+  /* Customize page: preview on top, choices below. */
+  .customize {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .customize-side {
+    position: static;
+  }
+
+  /* XP block: number on top, bar below. */
+  .result-xp {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .result-xp .xp-meter {
+    width: 100%;
+  }
+
+  /* Profile page: avatar above the details. */
+  .profile-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+    padding: 1.25rem;
+  }
+
+  .profile-avatar {
+    width: 120px;
+    height: 120px;
+  }
+
   /* Snippets page: lists on top, the selected snippet below. */
   .library {
     grid-template-columns: 1fr;
@@ -2401,7 +3469,7 @@ a.btn {
   /* Make the code box smaller on mobile. */
   .code-display {
     padding: 1.25rem 1.25rem;
-    font-size: 0.95rem;
+    font-size: calc(0.95rem * var(--code-scale, 1) * var(--font-scale, 1));
   }
 
   /* Stack the result content vertically. */

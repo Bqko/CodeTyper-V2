@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Your CodeType profile: level, XP, statistics and backup.">
+<title>Profile — CodeType</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="appearance.js"></script>
+</head>
+<body>
+
+  <!-- ==================== HEADER / NAVIGATION ==================== -->
+  <!-- (the profile badge is added to the links by progress.js) -->
+  <header>
+    <nav>
+      <a class="logo" href="index.html">CodeType</a>
+
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="practice.html">Practice</a>
+        <a href="snippets.html">Snippets</a>
+        <a href="customize.html">Customize</a>
+        <button id="theme-toggle" class="btn-secondary">Dark Mode</button>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- ==================== PROFILE CARD ==================== -->
+    <section class="profile-top">
+      <div class="profile-card">
+
+        <img class="profile-avatar" id="profile-avatar" alt="Your avatar: a hooded hacker" width="160" height="160">
+
+        <div class="profile-info">
+          <label class="profile-label" for="profile-name">Player name</label>
+          <input class="profile-name-input" id="profile-name" type="text"
+                 maxlength="20" autocomplete="off" spellcheck="false">
+
+          <p class="profile-level" id="profile-level"></p>
+
+          <div class="xp-meter">
+            <div class="xp-meter-labels">
+              <span id="profile-xp-text"></span>
+              <span id="profile-xp-next"></span>
+            </div>
+            <div class="xp-bar" role="progressbar" id="profile-xp-bar"
+                 aria-label="XP to the next level" aria-valuemin="0" aria-valuemax="100">
+              <div class="xp-bar-fill" id="profile-xp-fill"></div>
+            </div>
+          </div>
+
+          <p class="profile-total" id="profile-total"></p>
+          <p class="profile-total" id="profile-next"></p>
+
+          <a class="btn btn-secondary profile-customize" href="customize.html">Customize your avatar</a>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ==================== STATISTICS ==================== -->
+    <section class="home-section profile-section">
+      <h2 class="section-title">Statistics</h2>
+      <div class="stat-cards" id="stat-cards"></div>
+    </section>
+
+
+    <!-- ==================== HOW XP WORKS ==================== -->
+    <section class="home-section profile-section">
+      <h2 class="section-title">How XP works</h2>
+      <ul class="plain-list" id="xp-rules"></ul>
+    </section>
+
+
+    <!-- ==================== LEVELS ==================== -->
+    <section class="home-section profile-section">
+      <h2 class="section-title">Levels</h2>
+      <p class="section-sub">Every level needs a little more XP than the one before.</p>
+      <ol class="ladder" id="ladder"></ol>
+    </section>
+
+
+    <!-- ==================== BACKUP ==================== -->
+    <section class="home-section profile-section">
+      <h2 class="section-title">Backup</h2>
+      <p class="section-sub">
+        Your progress is saved in this browser only. Create a backup code to
+        keep it safe or to move it to another browser or device.
+      </p>
+
+      <div class="backup">
+        <textarea class="backup-code" id="backup-code" rows="3" spellcheck="false"
+                  aria-label="Backup code"
+                  placeholder="Your backup code appears here. To restore, paste a code here and press Import."></textarea>
+
+        <div class="backup-actions">
+          <button id="export-button" class="btn-secondary">Create backup code</button>
+          <button id="import-button" class="btn-secondary">Import this code</button>
+        </div>
+
+        <p class="backup-message" id="backup-message" role="status"></p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer>
+    <p>&copy; 2026 CodeType. All rights reserved.</p>
+  </footer>
+
+  <script src="theme.js"></script>
+  <script src="snippet-tools.js"></script>
+  <script src="progress.js"></script>
+  <script>
+    /* ==========================================================
+       PROFILE PAGE
+       Shows the saved profile (avatar, name, level, XP and
+       statistics), explains how XP works, and has the backup tools.
+
+       Shared code: progress.js (XP, levels, saved profile) and
+       snippet-tools.js (difficulty names, small helpers).
+       ========================================================== */
+
+    /* If a shared file is missing (they must sit in the same folder as
+       profile.html), say so clearly instead of showing an empty page. */
+    const missingFiles = [];
+
+    if (typeof recordRun === 'undefined') missingFiles.push('progress.js');
+    if (typeof DIFFICULTIES === 'undefined') missingFiles.push('snippet-tools.js');
+
+    if (missingFiles.length > 0) {
+      const message =
+        'Missing file: ' + missingFiles.join(' and ') + '. Put ' +
+        (missingFiles.length > 1 ? 'them' : 'it') +
+        ' in the same folder as profile.html and refresh the page.';
+
+      document.querySelector('.profile-card').textContent = message;
+      throw new Error(message);   // stops the rest of the script
+    }
+
+
+    const $ = (id) => document.getElementById(id);
+
+    // Numbers with thousands separators: 12480 -> "12,480".
+    const formatNumber = (n) => n.toLocaleString('en-US');
+
+
+    /* ==========================================================
+       1. THE PROFILE CARD AND STATISTICS
+       ========================================================== */
+
+    /* Counts the unlocked achievements ("rank:difficulty" keys such as
+       "average:hard", saved by progress.js). */
+    function countAchievements() {
+      const saved = loadAchievements();
+      let unlocked = 0;
+
+      RANK_ORDER.forEach((rank) => {
+        DIFFICULTIES.forEach((difficulty) => {
+          if (saved[rank + ':' + difficulty.id]) unlocked++;
+        });
+      });
+
+      return { unlocked: unlocked, total: RANK_ORDER.length * DIFFICULTIES.length };
+    }
+
+
+    function renderProfile() {
+      const profile = loadProfile();
+      const info = levelInfo(profile.xp);
+
+      $('profile-avatar').src = avatarImage();
+      $('profile-name').value = profile.name;
+
+      $('profile-level').textContent = 'Level ' + info.level + ' · ' + info.title;
+      $('profile-xp-text').textContent =
+        formatNumber(info.intoLevel) + ' / ' + formatNumber(info.needed) + ' XP';
+      $('profile-xp-next').textContent =
+        formatNumber(info.needed - info.intoLevel) + ' XP to level ' + (info.level + 1);
+
+      $('profile-xp-fill').style.width = Math.round(info.progress * 100) + '%';
+      $('profile-xp-bar').setAttribute('aria-valuenow', Math.round(info.progress * 100));
+
+      $('profile-total').textContent = formatNumber(profile.xp) + ' XP in total';
+
+      // What the next level unlocks (appearance.js), if that file is present.
+      if (typeof nextUnlock === 'function') {
+        const next = nextUnlock(info.level);
+
+        $('profile-next').textContent = next
+          ? 'Next unlock at level ' + next.level + ': ' + summarizeUnlocks(next.labels, 3)
+          : 'You have unlocked everything.';
+      }
+
+      // Statistics cards.
+      const achievements = countAchievements();
+      const average = profile.runs > 0
+        ? Math.round((profile.accuracySum / profile.runs) * 100) + '%'
+        : '–';
+
+      const stats = [
+        ['Runs finished', formatNumber(profile.runs)],
+        ['Best WPM', profile.bestWpm > 0 ? String(profile.bestWpm) : '–'],
+        ['Average accuracy', average],
+        ['Characters typed', formatNumber(profile.chars)],
+        ['Achievements', achievements.unlocked + ' / ' + achievements.total],
+        ['Explanations read', formatNumber(Object.keys(profile.studied).length)]
+      ];
+
+      $('stat-cards').innerHTML = '';
+
+      stats.forEach(([label, value]) => {
+        const card = makeElement('div', 'stat-card');
+
+        card.append(
+          makeElement('div', 'stat-card-value', value),
+          makeElement('div', 'stat-card-label', label)
+        );
+
+        $('stat-cards').appendChild(card);
+      });
+
+      renderLadder(info.level);
+    }
+
+
+    /* ==========================================================
+       2. HOW XP WORKS (the text is built from the settings in
+          progress.js, so it always matches the real numbers)
+       ========================================================== */
+
+    function renderRules() {
+      const multipliers = DIFFICULTIES
+        .map(d => d.label + ' ×' + DIFFICULTY_XP[d.id])
+        .join(', ');
+
+      const bonuses = Object.values(RANK_XP_BONUS);
+
+      const rules = [
+        'Every word you type (5 correct characters) gives ' + XP_PER_WORD + ' XP.',
+        'The difficulty multiplies it: ' + multipliers + '.',
+        'Your accuracy counts squared, so 95% gives ×0.90 and 80% gives ×0.64.',
+        'Your rank adds a bonus, from +' + Math.min(...bonuses) +
+          ' up to +' + Math.max(...bonuses) + ' XP.',
+        'Finishing the same snippet again gives less each time (half, a third, ' +
+          'a quarter, and so on, never below 10%).',
+        'A new achievement gives +' + ACHIEVEMENT_XP + ' XP.',
+        'Reading a snippet\u2019s explanation for the first time gives +' + STUDY_XP + ' XP.'
+      ];
+
+      rules.forEach((text) => {
+        $('xp-rules').appendChild(makeElement('li', '', text));
+      });
+    }
+
+
+    /* ==========================================================
+       3. LEVEL TITLES
+       ========================================================== */
+
+    function renderLadder(currentLevel) {
+      const ladder = $('ladder');
+
+      ladder.innerHTML = '';
+
+      LEVEL_TITLES.forEach((entry, index) => {
+        const next = LEVEL_TITLES[index + 1];
+
+        // This title is the current one if you are between it and the next.
+        const isCurrent = currentLevel >= entry.level &&
+          (!next || currentLevel < next.level);
+        const reached = currentLevel >= entry.level;
+
+        const row = makeElement(
+          'li',
+          'ladder-row' + (reached ? ' reached' : '') + (isCurrent ? ' current' : '')
+        );
+
+        row.append(
+          makeElement('span', 'ladder-level', 'Level ' + entry.level),
+          makeElement('span', 'ladder-title', entry.title),
+          makeElement('span', 'ladder-xp', formatNumber(xpToReach(entry.level)) + ' XP')
+        );
+
+        if (isCurrent) row.setAttribute('aria-current', 'true');
+
+        ladder.appendChild(row);
+      });
+    }
+
+
+    /* ==========================================================
+       4. PLAYER NAME
+       ========================================================== */
+
+    $('profile-name').addEventListener('change', () => {
+      // setProfileName cleans the text (trims it, limits the length).
+      $('profile-name').value = setProfileName($('profile-name').value);
+    });
+
+    $('profile-name').addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') $('profile-name').blur();
+    });
+
+
+    /* ==========================================================
+       5. BACKUP
+       ========================================================== */
+
+    function backupMessage(text, isError) {
+      const message = $('backup-message');
+
+      message.textContent = text;
+      message.classList.toggle('error', Boolean(isError));
+    }
+
+
+    $('export-button').addEventListener('click', async () => {
+      const code = exportProgress();
+
+      $('backup-code').value = code;
+
+      try {
+        await navigator.clipboard.writeText(code);
+        backupMessage('Backup code created and copied. Keep it somewhere safe.');
+      } catch (error) {
+        $('backup-code').select();
+        backupMessage('Backup code created. Copy it from the box above.');
+      }
+    });
+
+
+    $('import-button').addEventListener('click', () => {
+      const code = $('backup-code').value.trim();
+
+      if (!code) {
+        backupMessage('Paste a backup code into the box first.', true);
+        return;
+      }
+
+      if (!window.confirm('Importing replaces your current progress with the backup. Continue?')) {
+        return;
+      }
+
+      const result = importProgress(code);
+
+      if (!result.ok) {
+        backupMessage(result.message, true);
+        return;
+      }
+
+      backupMessage('Progress restored.');
+
+      // Reload so every part of the page uses the restored data.
+      setTimeout(() => window.location.reload(), 700);
+    });
+
+
+    /* ==========================================================
+       6. START
+       ========================================================== */
+
+    renderRules();
+    renderProfile();
+  </script>
+</body>
+</html>

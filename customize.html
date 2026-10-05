@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Customize your CodeType avatar, skin and typing style. Unlock more by levelling up.">
+<title>Customize — CodeType</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="appearance.js"></script>
+</head>
+<body class="page-wide">
+
+  <!-- ==================== HEADER / NAVIGATION ==================== -->
+  <!-- (the profile badge is added to the links by progress.js) -->
+  <header>
+    <nav>
+      <a class="logo" href="index.html">CodeType</a>
+
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="practice.html">Practice</a>
+        <a href="snippets.html">Snippets</a>
+        <a href="customize.html" aria-current="page">Customize</a>
+        <button id="theme-toggle" class="btn-secondary">Dark Mode</button>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- ==================== INTRO ==================== -->
+    <section class="customize-intro">
+      <h1>Customize</h1>
+      <p>
+        Make CodeType yours. Everything you pick changes the whole site
+        straight away. Level up to unlock more.
+      </p>
+    </section>
+
+
+    <!-- ==================== PAGE ==================== -->
+    <section class="customize">
+
+      <!-- Left: your avatar, level, and a live typing preview -->
+      <aside class="customize-side">
+
+        <div class="preview-card">
+          <img class="preview-avatar" id="preview-avatar" alt="Your avatar" width="140" height="140">
+          <p class="preview-level" id="preview-level"></p>
+          <p class="preview-note" id="preview-unlocked"></p>
+          <p class="preview-note" id="preview-next"></p>
+        </div>
+
+        <div class="preview-card">
+          <h2 class="preview-title">Typing preview</h2>
+
+          <!-- Uses the real typing styles, so it always matches the practice page. -->
+          <pre class="code-display demo preview-code" aria-hidden="true"><span class="correct">const total = items.re</span><span class="typing-caret"></span><span class="pending" data-t="fn">duce</span><span class="pending">((sum, n) =&gt; sum + n, </span><span class="pending" data-t="num">0</span><span class="pending">);</span></pre>
+        </div>
+
+        <button id="reset-button" class="btn-secondary reset-button">Reset to defaults</button>
+
+      </aside>
+
+      <!-- Right: all the choices (built by JavaScript) -->
+      <div class="customize-options" id="customize-options">
+        <p class="detail-empty">Loading…</p>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer>
+    <p>&copy; 2026 CodeType. All rights reserved.</p>
+  </footer>
+
+  <script src="theme.js"></script>
+  <script src="snippet-tools.js"></script>
+  <script src="progress.js"></script>
+  <script>
+    /* ==========================================================
+       CUSTOMIZE PAGE
+       Shows every customizable item (avatar parts, skins, typing
+       fonts and styles). Items you have not unlocked yet are locked
+       and show the level they unlock at. Choosing an item saves it
+       and applies it to the whole site immediately.
+
+       Shared code: appearance.js (the items and how they are applied)
+       and progress.js (your level).
+       ========================================================== */
+
+    /* If a shared file is missing (they must sit in the same folder as
+       customize.html), say so clearly instead of showing an empty page. */
+    const missingFiles = [];
+
+    if (typeof applyAppearance === 'undefined') missingFiles.push('appearance.js');
+    if (typeof makeElement === 'undefined') missingFiles.push('snippet-tools.js');
+    if (typeof recordRun === 'undefined') missingFiles.push('progress.js');
+
+    if (missingFiles.length > 0) {
+      const message =
+        'Missing file: ' + missingFiles.join(' and ') + '. Put ' +
+        (missingFiles.length > 1 ? 'them' : 'it') +
+        ' in the same folder as customize.html and refresh the page.';
+
+      document.getElementById('customize-options').textContent = message;
+      throw new Error(message);   // stops the rest of the script
+    }
+
+
+    const $ = (id) => document.getElementById(id);
+
+    // Your level, and the level you had when you last visited this page
+    // (items unlocked since then are marked NEW).
+    const currentLevel = levelInfo(loadProfile().xp).level;
+    const seenLevelAtLoad = loadAppearance().seenLevel;
+
+    const SECTION_TITLES = {
+      avatar: 'Avatar',
+      skin: 'Skin',
+      typing: 'Typing'
+    };
+
+    const SECTION_NOTES = {
+      avatar: 'The hacker keeps their face hidden. You decide everything around it.',
+      skin: 'A skin changes the colours of the whole site. Skins have their own light or dark colours; choose Classic to use the Light / Dark Mode button.',
+      typing: 'How the code looks while you type. Font size is free for everyone.'
+    };
+
+    // Load every font now, so each font card can show its own letters.
+    FONTS.forEach(loadFont);
+
+
+    /* ==========================================================
+       1. THE LITTLE PREVIEW INSIDE EACH CHOICE
+       ========================================================== */
+
+    /* Fills the preview area of one choice. */
+    function fillPreview(preview, group, item, appearance) {
+      // Avatar parts: a small avatar with just this choice applied.
+      if (group.section === 'avatar') {
+        const avatar = { ...appearance.avatar };
+
+        avatar[group.path[1]] = item.id;
+
+        const img = document.createElement('img');
+
+        img.src = avatarSrcFor(avatar);
+        img.alt = '';
+        img.width = 48;
+        img.height = 48;
+        preview.appendChild(img);
+        return;
+      }
+
+      // Skins: three colour stripes.
+      if (group.key === 'skin') {
+        item.swatch.forEach((color) => {
+          const stripe = document.createElement('i');
+
+          stripe.style.background = color;
+          preview.appendChild(stripe);
+        });
+
+        preview.classList.add('swatches');
+        return;
+      }
+
+      // Fonts and sizes: the letters "Aa" in that font or size.
+      if (group.key === 'font') {
+        preview.textContent = 'Aa';
+        preview.style.fontFamily = item.family + ', monospace';
+        preview.style.fontSize = (1.3 * item.scale) + 'rem';
+        return;
+      }
+
+      if (group.key === 'fontSize') {
+        preview.textContent = 'Aa';
+        preview.style.fontSize = (1.1 * item.scale) + 'rem';
+        return;
+      }
+
+      // Typed letters: sample text with that style.
+      if (group.key === 'letters') {
+        preview.classList.add('sample-letters');
+        preview.dataset.style = item.id;
+        preview.textContent = 'code';
+        return;
+      }
+
+      // Caret: a letter with that caret shape next to it.
+      if (group.key === 'caret') {
+        preview.classList.add('sample-caret');
+        preview.dataset.style = item.id;
+        preview.append('a', document.createElement('i'), 'b');
+        return;
+      }
+
+      // Caret colour: a coloured dot ("Skin colour" uses the accent).
+      if (group.key === 'caretColor') {
+        const dot = document.createElement('i');
+
+        dot.className = 'color-dot';
+        dot.style.background = item.css || 'var(--stamp)';
+        preview.appendChild(dot);
+      }
+    }
+
+
+    /* ==========================================================
+       2. THE CHOICES
+       ========================================================== */
+
+    /* Builds the button for one item. */
+    function makeOption(group, item, appearance) {
+      const locked = item.level > currentLevel;
+      const selected = readPath(appearance, group.path) === item.id;
+      const isNew = !locked && item.level > seenLevelAtLoad;
+
+      const button = makeElement(
+        'button',
+        'option' + (selected ? ' selected' : '') + (locked ? ' locked' : '')
+      );
+
+      button.type = 'button';
+      button.setAttribute('aria-pressed', String(selected));
+
+      const preview = makeElement('span', 'option-preview');
+
+      fillPreview(preview, group, item, appearance);
+
+      const name = makeElement('span', 'option-name', item.name);
+
+      button.append(preview, name);
+
+      if (item.note) {
+        button.title = item.note;
+      }
+
+      if (locked) {
+        // Locked: cannot be chosen. Shows the level that unlocks it.
+        button.disabled = true;
+        button.title = 'Unlocks at level ' + item.level + ' (' + levelTitle(item.level) + ')';
+        button.appendChild(makeElement('span', 'option-lock', '🔒 Level ' + item.level));
+      } else if (isNew) {
+        button.appendChild(makeElement('span', 'option-new', 'NEW'));
+      }
+
+      button.addEventListener('click', () => choose(group, item));
+
+      return button;
+    }
+
+
+    /* Draws every section and every group of choices. */
+    function renderOptions() {
+      const appearance = loadAppearance();
+      const container = $('customize-options');
+
+      container.innerHTML = '';
+
+      Object.keys(SECTION_TITLES).forEach((sectionKey) => {
+        const section = makeElement('section', 'option-section');
+
+        section.append(
+          makeElement('h2', 'option-section-title', SECTION_TITLES[sectionKey]),
+          makeElement('p', 'option-section-note', SECTION_NOTES[sectionKey])
+        );
+
+        CUSTOMIZE_GROUPS
+          .filter(group => group.section === sectionKey)
+          .forEach((group) => {
+            // A group needs its own heading only when the section has several.
+            if (CUSTOMIZE_GROUPS.filter(g => g.section === sectionKey).length > 1) {
+              section.appendChild(makeElement('h3', 'option-group-title', group.label));
+            }
+
+            const grid = makeElement('div', 'option-grid');
+
+            group.items.forEach(item => grid.appendChild(makeOption(group, item, appearance)));
+            section.appendChild(grid);
+          });
+
+        container.appendChild(section);
+      });
+
+      renderPreview();
+    }
+
+
+    /* Picks an item: saves it, applies it to the whole site, redraws. */
+    function choose(group, item) {
+      if (item.level > currentLevel) return;   // locked
+
+      const appearance = loadAppearance();
+
+      writePath(appearance, group.path, item.id);
+      saveAppearance(appearance);
+      applyAppearance();
+
+      renderOptions();
+      renderHeaderBadge(false);   // the badge shows the avatar too
+    }
+
+
+    /* ==========================================================
+       3. THE PREVIEW CARD (avatar, level, what comes next)
+       ========================================================== */
+
+    function renderPreview() {
+      const info = levelInfo(loadProfile().xp);
+      const counts = countUnlockedItems(info.level);
+      const next = nextUnlock(info.level);
+
+      $('preview-avatar').src = avatarSrc();
+      $('preview-level').textContent = 'Level ' + info.level + ' · ' + info.title;
+      $('preview-unlocked').textContent =
+        counts.unlocked + ' of ' + counts.total + ' items unlocked';
+
+      $('preview-next').textContent = next
+        ? 'Next unlock at level ' + next.level + ': ' + summarizeUnlocks(next.labels, 3)
+        : 'You have unlocked everything.';
+    }
+
+
+    /* ==========================================================
+       4. RESET
+       ========================================================== */
+
+    $('reset-button').addEventListener('click', () => {
+      const appearance = defaultAppearance();
+
+      appearance.seenLevel = currentLevel;
+      saveAppearance(appearance);
+      applyAppearance();
+
+      renderOptions();
+      renderHeaderBadge(false);
+    });
+
+
+    /* ==========================================================
+       5. START
+       ========================================================== */
+
+    // From now on, today's unlocks count as seen.
+    const startAppearance = loadAppearance();
+
+    renderOptions();
+
+    startAppearance.seenLevel = currentLevel;
+    saveAppearance(startAppearance);
+  </script>
+</body>
+</html>

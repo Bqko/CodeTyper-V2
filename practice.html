@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<script src="appearance.js"></script>
 </head>
 
 <body>
@@ -21,6 +22,7 @@
         <a href="index.html">Home</a>
         <a href="practice.html" aria-current="page">Practice</a>
         <a href="snippets.html">Snippets</a>
+        <a href="customize.html">Customize</a>
         <button id="theme-toggle" class="btn-secondary">Dark Mode</button>
       </div>
     </nav>
@@ -115,6 +117,25 @@
         </div>
       </div>
 
+      <!-- XP earned by this run (filled in by showXpResult) -->
+      <div class="result-xp" id="result-xp">
+        <div class="xp-gain">
+          <span class="xp-gain-plus">+</span><span class="xp-gain-number" id="xp-gain">0</span>
+          <span class="xp-gain-unit">XP</span>
+        </div>
+
+        <div class="xp-meter">
+          <div class="xp-meter-labels">
+            <span id="xp-level-label"></span>
+            <span id="xp-progress-text"></span>
+          </div>
+          <div class="xp-bar">
+            <div class="xp-bar-fill" id="xp-bar-fill"></div>
+          </div>
+          <p class="xp-breakdown" id="xp-breakdown"></p>
+        </div>
+      </div>
+
       <div class="result-stats">
         <div><div class="n" id="r-wpm">0</div><div class="l">WPM</div></div>
         <div><div class="n" id="r-acc">0%</div><div class="l">ACCURACY</div></div>
@@ -177,10 +198,11 @@
   <script src="theme.js"></script>
   <script src="highlight.js"></script>
   <script src="snippet-tools.js"></script>
+  <script src="progress.js"></script>
   <script>
     /* ==========================================================
        REQUIRED FILES
-       This page needs highlight.js and snippet-tools.js. They must sit
+       This page needs highlight.js, snippet-tools.js and progress.js. They must sit
        in the same folder as practice.html. If one is missing, say so clearly
        instead of showing an empty page.
        ========================================================== */
@@ -189,6 +211,7 @@
 
     if (typeof tokenize === 'undefined') missingFiles.push('highlight.js');
     if (typeof fetchSnippetLibrary === 'undefined') missingFiles.push('snippet-tools.js');
+    if (typeof recordRun === 'undefined') missingFiles.push('progress.js');
 
     if (missingFiles.length > 0) {
       const message =
@@ -277,12 +300,20 @@
 
         if (lang === 'all') {
             pool = Object.entries(SNIPPETS).flatMap(([name, level]) =>
-                (level[difficulty] || []).map(snippet => ({ ...snippet, language: name }))
+                (level[difficulty] || []).map((snippet, index) => ({
+                    ...snippet,
+                    language: name,
+                    id: name + '-' + difficulty + '-' + index
+                }))
             );
         } else {
             const list = (SNIPPETS[lang] && SNIPPETS[lang][difficulty]) || [];
 
-            pool = list.map(snippet => ({ ...snippet, language: lang }));
+            pool = list.map((snippet, index) => ({
+                ...snippet,
+                language: lang,
+                id: lang + '-' + difficulty + '-' + index
+            }));
         }
 
         // null means "nothing found for this choice".
@@ -467,12 +498,21 @@
       display.classList.remove('finish-pulse');
       $('rank-burst').innerHTML = '';
       $('emoji-layer').innerHTML = '';
+      resetXpResult();
 
       display.innerHTML = '';
       spans = [...target].map((ch, index) => {
         const s = document.createElement('span');
 
-        s.textContent = ch;
+        if (ch === '\n') {
+          const enterMarker = document.createElement('span');
+          enterMarker.className = 'enter-marker';
+          enterMarker.setAttribute('aria-hidden', 'true');
+          enterMarker.textContent = '↵';
+          s.append(enterMarker, document.createTextNode(ch));
+        } else {
+          s.textContent = ch;
+        }
         s.className = 'pending';
 
         // data-t survives later className changes (pending/correct/incorrect).
@@ -573,7 +613,24 @@
       countUp($('r-errors'), String(errorCount),         300);
 
       // Pick the rank from the WPM that is shown, and prepare its reveal.
-      showRank(parseInt($('stat-wpm').textContent, 10) || 0, difficultySelect.value);
+      const wpmValue = parseInt($('stat-wpm').textContent, 10) || 0;
+      const shown = showRank(wpmValue, difficultySelect.value);
+
+      // XP for this run (progress.js), its animation, and the level-up banner.
+      const run = recordRun({
+        snippetId: currentSnippet && currentSnippet.id,
+        difficulty: difficultySelect.value,
+        rankId: shown.rank.id,
+        wpm: wpmValue,
+        accuracy: totalKeystrokes ? correctKeystrokes / totalKeystrokes : 1,
+        correctChars: correctCount,
+        newAchievement: shown.isNewAchievement
+      });
+
+      showXpResult(run);
+      renderHeaderBadge(run.leveledUp);
+
+      if (run.leveledUp) spawnLevelUp(run, shown.isNewAchievement ? 1 : 0);
 
       // The "Explain this code" button, if this snippet has an explanation.
       explainBox.hidden = !(currentSnippet && currentSnippet.summary);
@@ -776,7 +833,8 @@
       $('rank-line').textContent = rank.line;
 
       // Each rank + difficulty is its own achievement, unlocked the first time.
-      const isNewAchievement = unlockAchievement(rank.id, difficulty);
+      const achievement = unlockAchievement(rank.id, difficulty);
+      const isNewAchievement = achievement.isNew;
 
       // Clear leftovers from a previous run, then add this rank's effects.
       $('emoji-layer').innerHTML = '';
@@ -785,7 +843,9 @@
       spawnEmojis(rank);
       spawnBottomConfetti(rank);
       spawnCannons(rank);
-      spawnAchievement(rank, difficulty, isNewAchievement);   // last: drawn on top
+      spawnAchievement(rank, difficulty, isNewAchievement, achievement.lowerCount);   // last: drawn on top
+
+      return { rank: rank, isNewAchievement: isNewAchievement };
     }
 
 
@@ -873,7 +933,7 @@
     /* Confetti that shoots up from the bottom of the whole screen
        (like the emojis, but small coloured pieces). The movement is
        the CSS animation "confetti-launch" in style.css. */
-    function spawnBottomConfetti(rank) {
+    function spawnBottomConfetti(rank, extraDelay = 0) {
       const layer = $('emoji-layer');
 
       if (!rank.bottomConfetti || prefersReducedMotion()) return;
@@ -896,7 +956,7 @@
 
         piece.style.animationDuration = (2.4 + Math.random() * 1.2) + 's';
         piece.style.animationDelay =
-          (RANK_REVEAL + Math.random() * 0.9) + 's';
+          (RANK_REVEAL + extraDelay + Math.random() * 0.9) + 's';
 
         piece.addEventListener('animationend', () => piece.remove());
 
@@ -957,9 +1017,43 @@
     }
 
 
+    /* Builds a banner that slides down from the top of the screen.
+       options = { tier, image, label, title, desc, delay, stack }
+       tier  = decides the colour (see "Banner colour" in style.css)
+       delay = seconds to wait, stack = 0, 1, ... (lower banners are below) */
+    function createBanner(options) {
+      const toast = document.createElement('div');
+
+      toast.className = 'achievement';
+      toast.dataset.tier = options.tier;
+      toast.style.setProperty('--delay', options.delay + 's');
+      toast.style.setProperty('--stack', options.stack || 0);
+
+      toast.innerHTML =
+        '<img class="achievement-img" alt="" width="46" height="46">' +
+        '<div class="achievement-body">' +
+          '<div class="achievement-label"></div>' +
+          '<div class="achievement-title"></div>' +
+          '<div class="achievement-desc"></div>' +
+        '</div>';
+
+      toast.querySelector('.achievement-img').src = options.image;
+      toast.querySelector('.achievement-label').textContent = options.label;
+      toast.querySelector('.achievement-title').textContent = options.title;
+      toast.querySelector('.achievement-desc').textContent = options.desc;
+
+      // The shine on the banner is also an animation, so check which one ended.
+      toast.addEventListener('animationend', (event) => {
+        if (event.animationName === 'achievement-toast') toast.remove();
+      });
+
+      return toast;
+    }
+
+
     /* "Achievement unlocked" banner (like in video games). It only
        appears the FIRST time a rank is reached on a difficulty. */
-    function spawnAchievement(rank, difficulty, isNew) {
+    function spawnAchievement(rank, difficulty, isNew, lowerCount) {
       const layer = $('emoji-layer');
 
       if (!isNew || prefersReducedMotion()) return;
@@ -975,32 +1069,46 @@
       }
 
       // The banner slides down a little after the rank appears.
-      const rankIndex = RANKS.indexOf(rank);
-      const toast = document.createElement('div');
+      layer.appendChild(createBanner({
+        tier: rank.id,
+        image: rank.image,
+        label: 'Achievement unlocked',
+        title: rank.title,
+        desc: 'Typed ' + rankRange(RANKS.indexOf(rank)) + ' on ' + difficultyLabel(difficulty) +
+          (lowerCount > 0
+            ? ' · ' + lowerCount + ' lower rank' + (lowerCount === 1 ? '' : 's') + ' unlocked too'
+            : ''),
+        delay: RANK_REVEAL + 0.7,
+        stack: 0
+      }));
+    }
 
-      toast.className = 'achievement';
-      toast.dataset.tier = rank.id;   // CSS gives each rank its own colour
-      toast.style.setProperty('--delay', (RANK_REVEAL + 0.7) + 's');
 
-      toast.innerHTML =
-        '<img class="achievement-img" alt="" width="46" height="46">' +
-        '<div class="achievement-body">' +
-          '<div class="achievement-label">Achievement unlocked</div>' +
-          '<div class="achievement-title"></div>' +
-          '<div class="achievement-desc"></div>' +
-        '</div>';
+    /* "Level up!" banner and confetti, shown when the XP bar fills.
+       stack = 1 puts it under the achievement banner when both appear. */
+    function spawnLevelUp(run, stack) {
+      if (prefersReducedMotion()) return;
 
-      toast.querySelector('.achievement-img').src = rank.image;
-      toast.querySelector('.achievement-title').textContent = rank.title;
-      toast.querySelector('.achievement-desc').textContent =
-        'Typed ' + rankRange(rankIndex) + ' on ' + difficultyLabel(difficulty);
+      // New things to customize at this level? (appearance.js)
+      const unlocked = typeof unlocksBetween === 'function'
+        ? unlocksBetween(run.before.level, run.after.level)
+        : [];
 
-      // The shine on the banner is also an animation, so check which one ended.
-      toast.addEventListener('animationend', (event) => {
-        if (event.animationName === 'achievement-toast') toast.remove();
-      });
+      $('emoji-layer').appendChild(createBanner({
+        tier: 'levelup',
+        image: avatarImage(),
+        label: 'Level up!',
+        title: 'Level ' + run.after.level,
+        desc: run.after.title +
+          (unlocked.length > 0 ? ' · New: ' + summarizeUnlocks(unlocked, 2) : ''),
+        delay: RANK_REVEAL + 1.8,
+        stack: stack
+      }));
 
-      layer.appendChild(toast);
+      spawnBottomConfetti({
+        bottomConfetti: 40,
+        colors: ['#47D6FF', '#6FBF8B', '#F7C948', '#C39BE0', '#FFFFFF']
+      }, 1.4);
     }
 
 
@@ -1009,36 +1117,16 @@
        Every rank can be earned on every difficulty, and each
        combination is its own achievement (6 ranks x 4 difficulties
        = 24). An achievement unlocks the first time you reach that
-       rank on that difficulty.
+       rank on that difficulty, and a higher rank also unlocks all
+       the lower ranks on the same difficulty.
 
        Saved in localStorage as { "average:medium": "2026-10-03", ... }
+       (the saving and the "higher rank unlocks the lower ranks" rule
+       are in progress.js, section 8).
        ========================================================== */
 
 
-    const ACHIEVEMENTS_KEY = 'achievements';
     const TOTAL_ACHIEVEMENTS = RANKS.length * DIFFICULTIES.length;
-
-
-    /* Read / write the saved achievements (safe if storage is blocked). */
-    function loadAchievements() {
-      try {
-        const saved = JSON.parse(localStorage.getItem(ACHIEVEMENTS_KEY));
-
-        return saved && typeof saved === 'object' ? saved : {};
-      } catch (error) {
-        return {};
-      }
-    }
-
-    function saveAchievements(map) {
-      try {
-        localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(map));
-      } catch (error) {
-        // Storage not available: achievements just won't be remembered.
-      }
-    }
-
-
 
 
     /* The WPM range of a rank as text, e.g. "20-39 WPM". */
@@ -1074,18 +1162,14 @@
     }
 
 
-    /* Unlocks one achievement. Returns true only the FIRST time. */
+    /* Unlocks a rank on a difficulty (progress.js also unlocks every lower
+       rank on that difficulty). Returns { isNew, lowerCount }. */
     function unlockAchievement(rankId, difficulty) {
-      const key = rankId + ':' + difficulty;
-      const saved = loadAchievements();
+      const result = unlockRankAchievement(rankId, difficulty);
 
-      if (saved[key]) return false;
-
-      saved[key] = new Date().toISOString().slice(0, 10);   // e.g. 2026-10-03
-      saveAchievements(saved);
       updateAchievementCount();
 
-      return true;
+      return result;
     }
 
 
@@ -1282,7 +1366,12 @@
     explainButton.addEventListener('click', () => {
       const opening = explainPanel.hidden;
 
-      if (opening) renderExplanation();
+      if (opening) {
+        renderExplanation();
+
+        // +5 XP the first time this snippet's explanation is read.
+        grantStudyXp(currentSnippet && currentSnippet.id);
+      }
 
       explainPanel.hidden = !opening;
       explainButton.setAttribute('aria-expanded', String(opening));
@@ -1298,6 +1387,103 @@
         });
       }
     });
+
+
+    /* ==========================================================
+       8E. XP RESULT
+       Shows the XP earned by a run under the rank: the number counts
+       up, the bar fills, and a short line explains where the XP came
+       from. (The XP itself is calculated and saved by progress.js.)
+       ========================================================== */
+
+    let xpBarTimers = [];
+
+
+    /* Stops the bar animation and clears the level-up highlight. */
+    function resetXpResult() {
+      xpBarTimers.forEach(clearTimeout);
+      xpBarTimers = [];
+      $('result-xp').classList.remove('level-up');
+    }
+
+
+    /* run = the object returned by recordRun() in progress.js. */
+    function showXpResult(run) {
+      resetXpResult();
+
+      const box = $('result-xp');
+      const fill = $('xp-bar-fill');
+      const before = run.before;
+      const after = run.after;
+
+      // Same delay variable as the rank block, so it appears right after it.
+      box.style.setProperty('--reveal', RANK_REVEAL + 's');
+
+      // "+264 XP" counts up.
+      $('xp-gain').textContent = String(run.xpGained);
+      countUp($('xp-gain'), String(run.xpGained), (RANK_REVEAL + 0.5) * 1000);
+
+      // A short line about where the XP came from.
+      const b = run.breakdown;
+      const parts = [
+        b.words + ' words',
+        difficultyLabel(currentSnippet.difficulty) + ' ×' + b.difficulty,
+        'accuracy ×' + b.accuracyFactor.toFixed(2)
+      ];
+
+      if (b.repeat < 1) parts.push('played before ×' + b.repeat.toFixed(2));
+      if (b.rankBonus > 0) parts.push('rank +' + b.rankBonus);
+      if (b.achievement > 0) parts.push('new achievement +' + b.achievement);
+
+      $('xp-breakdown').textContent = parts.join(' · ');
+
+      // The bar starts where it was before this run.
+      const setLabels = (info) => {
+        $('xp-level-label').textContent = 'Level ' + info.level + ' · ' + info.title;
+        $('xp-progress-text').textContent =
+          info.intoLevel + ' / ' + info.needed + ' XP';
+      };
+
+      const setWidth = (progress) => {
+        fill.style.width = Math.round(progress * 100) + '%';
+      };
+
+      fill.style.transition = 'none';
+      setLabels(before);
+      setWidth(before.progress);
+      void fill.offsetWidth;          // apply the start position before animating
+      fill.style.transition = '';
+
+      // Reduced motion: show the final state straight away.
+      if (prefersReducedMotion()) {
+        setLabels(after);
+        setWidth(after.progress);
+        return;
+      }
+
+      const start = (RANK_REVEAL + 0.8) * 1000;
+      const later = (action, ms) => xpBarTimers.push(setTimeout(action, ms));
+
+      if (!run.leveledUp) {
+        later(() => { setLabels(after); setWidth(after.progress); }, start);
+        return;
+      }
+
+      // Level up: fill to the end, start the next level from empty,
+      // then fill to the new position.
+      later(() => setWidth(1), start);
+
+      later(() => {
+        fill.style.transition = 'none';
+        setWidth(0);
+        setLabels(after);
+        void fill.offsetWidth;
+        fill.style.transition = '';
+        box.classList.add('level-up');
+      }, start + 900);
+
+      later(() => setWidth(after.progress), start + 1000);
+    }
 
 
     /* ==========================================================
@@ -1581,7 +1767,11 @@
 
       updateCaret();
 
-      if (position >= spans.length) {
+      const hasIncorrectCharacters = spans.some(span =>
+        span.classList.contains('incorrect')
+      );
+
+      if (position >= spans.length && !hasIncorrectCharacters) {
         finish();
       }
 

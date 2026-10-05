@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<script src="appearance.js"></script>
 </head>
 <body class="page-wide">
 
@@ -21,6 +22,7 @@
         <a href="index.html">Home</a>
         <a href="practice.html">Practice</a>
         <a href="snippets.html" aria-current="page">Snippets</a>
+        <a href="customize.html">Customize</a>
         <button id="theme-toggle" class="btn-secondary">Dark Mode</button>
       </div>
     </nav>
@@ -72,10 +74,11 @@
   <script src="theme.js"></script>
   <script src="highlight.js"></script>
   <script src="snippet-tools.js"></script>
+  <script src="progress.js"></script>
   <script>
     /* ==========================================================
        REQUIRED FILES
-       This page needs highlight.js and snippet-tools.js. They must sit
+       This page needs highlight.js, snippet-tools.js and progress.js. They must sit
        in the same folder as snippets.html. If one is missing, say so clearly
        instead of showing an empty page.
        ========================================================== */
@@ -84,6 +87,7 @@
 
     if (typeof tokenize === 'undefined') missingFiles.push('highlight.js');
     if (typeof fetchSnippetLibrary === 'undefined') missingFiles.push('snippet-tools.js');
+    if (typeof grantStudyXp === 'undefined') missingFiles.push('progress.js');
 
     if (missingFiles.length > 0) {
       const message =
@@ -318,6 +322,10 @@
       renderDetail(item);
 
       history.replaceState(null, '', '#' + id);
+
+      // Opening a snippet yourself (not the automatic first one) counts as
+      // reading it: +5 XP the first time (progress.js).
+      if (scrollToIt) grantStudyXp(id);
 
       // On a narrow screen the details are below the list, so scroll to them.
       const narrow = window.matchMedia && window.matchMedia('(max-width: 720px)').matches;
